@@ -2,41 +2,50 @@
 #include <stdlib.h>
 #include <string.h>
 #include "debug.h"
-#include "sfmm.h"
 
-/*return lsb of header*/
+
+long unsigned int *getRow(void* ptr, int row){
+    return (long unsigned int*)(ptr);
+}
 int getNextAlloc(void* ptr){
-    return (int)((long int*)(ptr*) & 1);
+    return (int) *((long unsigned int*)(ptr) & 1);
 }
 int getPrevAlloc(void* ptr){
-    return (int)((long int*)(ptr*) & 2) >> 1;
+    return (int) *((long unsigned int*)(ptr) & 2) >> 1;
 }
-/*return last 32 lsb(s)*/
 size_t getBlockSize(void* ptr){
-    return (size_t)((long int*)ptr*) & 0xFFFFFFFF;
+    return (size_t) *((long unsigned int*)ptr) & 0xFFFFFFFF;
 }
-
 size_t getRequestedSize(void* ptr){
-    return (size_t)((long int*)ptr*) >> 32;
+    return (size_t) *((long unsigned int*)ptr) >> 32;
 }
-
 
 void setPrevAlloc(void* ptr, int prevAlloc){
-    return 1;
+    long unsigned int* header = getRow(ptr, 0);
+    header* = header*|(prevAlloc << 1);
 }
-
 void setNextAlloc(void* ptr, int nextAlloc){
-    return 1;
+    long unsigned int* header = getRow(ptr, 0);
+    header* = header*|(nextAlloc);
 }
-
 void setBlockSize(void* ptr, size_t block_size){
-    return 1;
+    long unsigned int* header = getRow(ptr, 0);
+    //clear bottom 32 excluding 2 lsb
+    header = header & ~((long unsigned int)0xFFFFFFFC);
+    header* = header*|((unsigned int)block_size);
 }
-
 void setRequestedSize(void* ptr, size_t requested_size){
-    return 1;
+    long unsigned int* header = getRow(ptr, 0);
+    //clear bottom 32 excluding 2 lsb
+    header = header & ~((long unsigned int)0xFFFFFFFF << 32);
+    header* = header*|((unsigned int)requested_size << 32);
 }
-
+void setPrev(void* ptr, void* prev){
+    long unsigned int* prevPtr = getRow(ptr, 0);
+}
+void setNext(void* ptr, void* next){
+    long unsigned int* nextPtr = getRow(ptr, 0);
+}
 
 void splitBlock(void* ptr, size_t block_size, size_t requested_size){
     int other_block_size = getBlockSize(ptr) - block_size;
@@ -58,7 +67,6 @@ void splitBlock(void* ptr, size_t block_size, size_t requested_size){
     initFreeBlock(ptr, prev, next, requested_size, block_size, 1, nextAlloc)
 
 }
-
 void setFooter(void* ptr, size_t block_size, int prevAlloc, int nxtAlloc){
     ptr = (char*)ptr + (block_size -8);
     setRequestedSize(ptr, 0);
