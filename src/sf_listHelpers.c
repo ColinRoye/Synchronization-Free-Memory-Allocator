@@ -4,50 +4,45 @@
 #include "debug.h"
 
 
-long unsigned int *getRow(void* ptr, int row){
-    return (long unsigned int*)(ptr);
+int getNextAlloc(sf_block* ptr){
+    return (int) (*ptr.header.block_size & 1);
 }
-int getNextAlloc(void* ptr){
-    return (int) *((long unsigned int*)(ptr) & 1);
+int getPrevAlloc(sf_block* ptr){
+    return (int) (*ptr.header.block_size & 2) >> 1;
 }
-int getPrevAlloc(void* ptr){
-    return (int) *((long unsigned int*)(ptr) & 2) >> 1;
+size_t getBlockSize(sf_block* ptr){
+    return (size_t)ptr.header.block_size & 0xFFFFFFFC;
 }
-size_t getBlockSize(void* ptr){
-    return (size_t) *((long unsigned int*)ptr) & 0xFFFFFFFF;
-}
-size_t getRequestedSize(void* ptr){
-    return (size_t) *((long unsigned int*)ptr) >> 32;
+size_t getRequestedSize(sf_block* ptr){
+    return (size_t) ptr.header.block_size;
 }
 
-void setPrevAlloc(void* ptr, int prevAlloc){
-    long unsigned int* header = getRow(ptr, 0);
-    header* = header*|(prevAlloc << 1);
+void setPrevAlloc(sf_block* ptr, int prevAlloc){
+    ptr.header.block_size* = (unsigned)(ptr.header.block_size*|(prevAlloc << 1));
+
 }
-void setNextAlloc(void* ptr, int nextAlloc){
-    long unsigned int* header = getRow(ptr, 0);
-    header* = header*|(nextAlloc);
+void setNextAlloc(sf_block* ptr, int nextAlloc){
+    ptr.header.block_size* = (unsigned)(ptr.header.block_size*|(nextAlloc << 1));
 }
-void setBlockSize(void* ptr, size_t block_size){
-    long unsigned int* header = getRow(ptr, 0);
-    //clear bottom 32 excluding 2 lsb
-    header = header & ~((long unsigned int)0xFFFFFFFC);
-    header* = header*|((unsigned int)block_size);
+void setBlockSize(sf_block* ptr, size_t block_size){
+    unsigned prevAlloc = getPrevAlloc(ptr);
+    unsigned nextAlloc = getPrevAlloc(ptr);
+
+    ptr.header.block_size* = (unsigned)(ptr.header.block_size*);
+    setNextAlloc(ptr, nextAlloc);
+    setPrevAlloc(ptr, prevAlloc);
 }
-void setRequestedSize(void* ptr, size_t requested_size){
-    long unsigned int* header = getRow(ptr, 0);
-    //clear bottom 32 excluding 2 lsb
-    header = header & ~((long unsigned int)0xFFFFFFFF << 32);
-    header* = header*|((unsigned int)requested_size << 32);
+void setRequestedSize(sf_block* ptr, size_t requested_size){
+    ptr.header.requested_size = (unsigned)requested_size;
 }
-void setPrev(void* ptr, void* prev){
-    long unsigned int* prevPtr = getRow(ptr, 0);
+void setPrev(sf_block* ptr, sf_block* prev){
+    ptr.header.links.prev = prev
 }
-void setNext(void* ptr, void* next){
-    long unsigned int* nextPtr = getRow(ptr, 0);
+void setNext(sf_block* ptr, void* next){
+    ptr.header.links.next = next
 }
 
-void splitBlock(void* ptr, size_t block_size, size_t requested_size){
+void splitBlock(sf_block* ptr, size_t block_size, size_t requested_size){
     int other_block_size = getBlockSize(ptr) - block_size;
     //check for splinters
     if(other_block_size < EFFECTIVE_BLOCK_SIZE){
@@ -67,7 +62,7 @@ void splitBlock(void* ptr, size_t block_size, size_t requested_size){
     initFreeBlock(ptr, prev, next, requested_size, block_size, 1, nextAlloc)
 
 }
-void setFooter(void* ptr, size_t block_size, int prevAlloc, int nxtAlloc){
+void setFooter(sf_block* ptr, size_t block_size, int prevAlloc, int nxtAlloc){
     ptr = (char*)ptr + (block_size -8);
     setRequestedSize(ptr, 0);
     setBlockSize(ptr, block_size);
@@ -76,7 +71,7 @@ void setFooter(void* ptr, size_t block_size, int prevAlloc, int nxtAlloc){
     return 1;
 }
 /*wrapper for setFooter, setFooter == setFreeHeader*/
-void setFreeHeader(void* ptr, size_t block_size, int prevAlloc, int nextAlloc, void* prev, void* next, size_t requested_size){
+void setFreeHeader(sf_block* ptr, size_t block_size, int prevAlloc, int nextAlloc, void* prev, void* next, size_t requested_size){
     setRequestedSize(ptr, 0);
     setBlockSize(ptr, block_size);
     setPrevAlloc(ptr, prevAlloc);
@@ -90,7 +85,7 @@ void initFreeBlock(ptr, prev, next, requested_size, block_size, prevAlloc, nextA
 }
 /*Allocated header is the same as set footer, with 2 additional rows (previous in list, next in list)*/
 /*NOTE: prev/next in list is not prev/next alloc, it is next in freeList */
-void setAllocHeader(void* ptr, size_t block_size, int prevAlloc, int nextAlloc, size_t requested_size){
+void setAllocHeader(sf_block* ptr, size_t block_size, int prevAlloc, int nextAlloc, size_t requested_size){
     setRequestedSize(ptr, requested_size);
     setBlockSize(ptr, block_size);
     setPrevAlloc(ptr, prevAlloc);
