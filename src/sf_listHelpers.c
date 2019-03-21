@@ -59,7 +59,7 @@ void splitBlock(sf_block* ptr, size_t block_size, size_t requested_size){
     setNextAlloc(ptr, 0);
     //set free block
     ptr = (char*) ptr + block_size;
-    initFreeBlock(ptr, prev, next, requested_size, block_size, 1, nextAlloc)
+    initFreeBlock(ptr, prev, next, block_size, 1, nextAlloc)
 
 }
 void setFooter(sf_block* ptr, size_t block_size, int prevAlloc, int nxtAlloc){
@@ -70,8 +70,16 @@ void setFooter(sf_block* ptr, size_t block_size, int prevAlloc, int nxtAlloc){
     setNextAlloc(ptr, nextAlloc);
     return 1;
 }
+void setAllocHeader(sf_block* ptr, size_t block_size, int prevAlloc, int nextAlloc, size_t requested_size){
+
+    setRequestedSize(ptr, requested_size);
+
+    setBlockSize(ptr, block_size);
+    setPrevAlloc(ptr, prevAlloc);
+    setNextAlloc(ptr,nextAlloc)
+}
 /*wrapper for setFooter, setFooter == setFreeHeader*/
-void setFreeHeader(sf_block* ptr, size_t block_size, int prevAlloc, int nextAlloc, void* prev, void* next, size_t requested_size){
+void setFreeHeader(sf_block* ptr, size_t block_size, int prevAlloc, int nextAlloc, sf_block* prev, sf_block* next){
     setRequestedSize(ptr, 0);
     setBlockSize(ptr, block_size);
     setPrevAlloc(ptr, prevAlloc);
@@ -79,10 +87,41 @@ void setFreeHeader(sf_block* ptr, size_t block_size, int prevAlloc, int nextAllo
     setNext(ptr, next);
     setPrev(ptr, prev);
 }
-void initFreeBlock(ptr, prev, next, requested_size, block_size, prevAlloc, nextAlloc){
-    setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, prev, next, size_t requested_size,)
-    setFooter(ptr, block_size, prevAlloc, nxtAlloc)
+void initFreeBlock(ptr, prev, next, block_size, prevAlloc, nextAlloc){
+    setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, prev, next);
+    setFooter(ptr, block_size, prevAlloc, nxtAlloc);
 }
+void initFirstBlock(){
+    char* temp = (char*)sf_mem_grow();
+    block_size ptr = (block_size)(temp + 8);
+
+    setNext(sf_free_list_head, ptr);
+    setPrev(sf_free_list_head, ptr);
+
+    initPrologue(ptr);
+
+
+    block_size ptr = (block_size)(temp + (PAGE_SZ - 8));
+    initEpilogue(ptr);
+
+    block_size ptr = (block_size)(temp + (40));
+    initFreeBlock(ptr, sf_free_list_head, sf_free_list_head, block_size, 1, nextAlloc);
+}
+void initPrologue(sf_block ptr){;
+    setRequestedSize(ptr, 0);
+    setBlockSize(ptr, 32);
+    setPrevAlloc(ptr, 1);
+    setNextAlloc(ptr, 0);
+
+    setFooter(ptr, 32, 0, 1);
+
+
+}
+void initEpilogue(sf_block ptr){
+    setAllocHeader(ptr, 32, 0, 1, 0)
+}
+
+
 /*Allocated header is the same as set footer, with 2 additional rows (previous in list, next in list)*/
 /*NOTE: prev/next in list is not prev/next alloc, it is next in freeList */
 void setAllocHeader(sf_block* ptr, size_t block_size, int prevAlloc, int nextAlloc, size_t requested_size){
