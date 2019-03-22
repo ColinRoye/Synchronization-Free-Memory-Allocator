@@ -18,7 +18,7 @@ unsigned int getBlockSize(sf_block* ptr){
     return (unsigned int)ptr->header.block_size & 0xFFFFFFFC;
 }
 unsigned int getRequestedSize(sf_block* ptr){
-    printf("getRequestedSize:\t%u\n",ptr->header.requested_size);
+    //printf("getRequestedSize:\t%u\n",ptr->header.requested_size);
     return (unsigned int) ptr->header.requested_size;
 }
 sf_block *getNext(sf_block* ptr){
@@ -57,9 +57,10 @@ void setNextAlloc(sf_block* ptr, unsigned int nextAlloc){
 }
 int setBlockSize(sf_block* ptr, unsigned int block_size){
     if(block_size % 16 != 0){
-        return 0
+        return 0;
     }
     ptr->header.block_size = block_size; //may break prev and next alloc deppending on order of use
+    return 1;
 }
 void setRequestedSize(sf_block* ptr, unsigned int requested_size){
     ptr->header.requested_size = requested_size;

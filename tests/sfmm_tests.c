@@ -284,7 +284,7 @@ Test(sf_memsuite_student, getPrev_test, .init = sf_mem_init, .fini = sf_mem_fini
 	free(dummy);
 }
 //SET ALLOC HEADER
-Test(sf_memsuite_student, getAllocHeader_test, .init = sf_mem_init, .fini = sf_mem_fini) {
+Test(sf_memsuite_student, setAllocHeader_test, .init = sf_mem_init, .fini = sf_mem_fini) {
 	sf_block* ptr = initEmptyBlock();
 	unsigned int block_size = 0xFFFFFFFC;
 	unsigned int requested_size = 0xFFFFFFFC;
@@ -294,7 +294,7 @@ Test(sf_memsuite_student, getAllocHeader_test, .init = sf_mem_init, .fini = sf_m
 	setAllocHeader(ptr, block_size, prevAlloc, nextAlloc, requested_size);
 
 	cr_assert_neq(block_size, getBlockSize(ptr));
-	cr_assert_eq(requested_size, getBlockSize(ptr));
+	cr_assert_eq(requested_size, getRequestedSize(ptr));
 	cr_assert_eq(nextAlloc, getNextAlloc(ptr));
 	cr_assert_eq(prevAlloc, getPrevAlloc(ptr));
 
@@ -309,7 +309,6 @@ Test(sf_memsuite_student, getAllocHeader_test, .init = sf_mem_init, .fini = sf_m
 	cr_assert_eq(nextAlloc, getNextAlloc(ptr));
 	cr_assert_eq(prevAlloc, getPrevAlloc(ptr));
 
-	printf("\nreq:%u\n", requested_size==getRequestedSize(ptr));
 
 
 	block_size = 48;
@@ -322,12 +321,43 @@ Test(sf_memsuite_student, getAllocHeader_test, .init = sf_mem_init, .fini = sf_m
 	cr_assert_eq(nextAlloc, getNextAlloc(ptr));
 	cr_assert_eq(prevAlloc, getPrevAlloc(ptr));
 
-	printf("\nreqest:%u\n", getRequestedSize(ptr));
+
+}
+// SET FREE HEADER
+Test(sf_memsuite_student, setFreeHeader_test, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_block* ptr = initEmptyBlock();
+	unsigned int block_size = 0xFFFFFFFC;
+	unsigned int nextAlloc = 1;
+	unsigned int prevAlloc = 1;
+
+	setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, ptr, ptr);
+
+	cr_assert_neq(block_size, getBlockSize(ptr));
+	cr_assert_eq(nextAlloc, getNextAlloc(ptr));
+	cr_assert_eq(prevAlloc, getPrevAlloc(ptr));
+
+	block_size = 32;
+	nextAlloc = 0;
+	prevAlloc = 1;
+	setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, ptr, ptr);
+
+	cr_assert_eq(block_size, getBlockSize(ptr));
+	cr_assert_eq(nextAlloc, getNextAlloc(ptr));
+	cr_assert_eq(prevAlloc, getPrevAlloc(ptr));
+
+
+
+	block_size = 48;
+	nextAlloc = 0;
+	prevAlloc = 1;
+	setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, ptr, ptr);
+	cr_assert_eq(block_size, getBlockSize(ptr));
+	cr_assert_eq(nextAlloc, getNextAlloc(ptr));
+	cr_assert_eq(prevAlloc, getPrevAlloc(ptr));
+
 
 }
 
-// void setAllocHeader(sf_block* ptr, size_t block_size, unsigned int prevAlloc, unsigned int nextAlloc, size_t requested_size);
-// void setFreeHeader(sf_block* ptr, size_t block_size, unsigned int prevAlloc, unsigned int nextAlloc, sf_block prev, sf_block next);
 // void setFooter(sf_block* ptr, size_t block_size, unsigned int prevAlloc, unsigned int nxtAlloc);
 // void clearHeader(sf_block* ptr);
 

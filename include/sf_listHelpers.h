@@ -19,7 +19,7 @@ void setNext(sf_block* ptr, sf_block* next);
 sf_block* splitBlock(sf_block* ptr, unsigned int block_size, unsigned int requested_size);
 void setFooter(sf_block* ptr, unsigned int block_size, unsigned int prevAlloc, unsigned int nxtAlloc);
 void setAllocHeader(sf_block* ptr, unsigned int block_size, unsigned int prevAlloc, unsigned int nextAlloc, unsigned int requested_size);
-void setFreeHeader(sf_block* ptr, unsigned int block_size, unsigned int prevAlloc, unsigned int nextAlloc, sf_block prev, sf_block next);
+void setFreeHeader(sf_block* ptr, unsigned int block_size, unsigned int prevAlloc, unsigned int nextAlloc, sf_block* prev, sf_block* next);
 void clearHeader(sf_block* ptr);
 void initPrologue(sf_block* ptr);
 void initEpilogue(sf_block* ptr);
