@@ -26,7 +26,7 @@ sf_block *getPrev(sf_block* ptr){
 }
 sf_block *getNextInMem(sf_block* ptr){
     if(!getNextAlloc(ptr)){
-        return (sf_block *)((char*)ptr + (getBlockSize(ptr)));
+        return (sf_block *)(((char*)ptr) + (getBlockSize(ptr)));
     }
     return NULL;
 }
@@ -62,33 +62,13 @@ void setNext(sf_block* ptr, sf_block* next){
     ptr->body.links.next = next;
 }
 
-void splitBlock(sf_block* ptr, size_t block_size, size_t requested_size){
-    unsigned int other_block_size = getBlockSize(ptr) - block_size;
-    //check for splunsigned inters
-    if(other_block_size < EFFECTIVE_BLOCK_SIZE){
-        return NULL;
-    }
-    //get variables for free block
-    sf_block* prev = getPrevPtr(ptr);
-    sf_block* next = getNextPtr(ptr);
-    unsigned int nextAlloc = getNextAlloc(ptr);
 
-    //set allocated block
-    setBlockSize(ptr, requested_size);
-    setBlockSize(ptr, block_size);
-    setNextAlloc(ptr, 0);
-    //set free block
-    ptr = (char*) ptr + block_size;
-    initFreeBlock((sf_block*)ptr, prev, next, block_size, 1, nextAlloc)
-
-}
-void setFooter(sf_block* ptr, size_t block_size, unsigned int prevAlloc, unsigned int nxtAlloc){
-    ptr = (char*)ptr + (block_size -8);
-    setRequestedSize(ptr, 0);
+void setFooter(sf_block* ptr, size_t block_size, unsigned int prevAlloc, unsigned int nextAlloc){
+    ptr = (sf_block *)(((char*)ptr) + (block_size -8));
+    setRequestedSize(ptr, (unsigned int)0);
     setBlockSize(ptr, block_size);
     setPrevAlloc(ptr, prevAlloc);
     setNextAlloc(ptr, nextAlloc);
-    return 1;
 }
 void setAllocHeader(sf_block* ptr, size_t block_size, unsigned int prevAlloc, unsigned int nextAlloc, size_t requested_size){
 
@@ -96,11 +76,11 @@ void setAllocHeader(sf_block* ptr, size_t block_size, unsigned int prevAlloc, un
 
     setBlockSize(ptr, block_size);
     setPrevAlloc(ptr, prevAlloc);
-    setNextAlloc(ptr,nextAlloc)
+    setNextAlloc(ptr,nextAlloc);
 }
-/*wrapper for setFooter, setFooter == setFreeHeader*/
-void setFreeHeader(sf_block* ptr, size_t block_size, unsigned int prevAlloc, unsigned int nextAlloc, sf_block prev, sf_block next){
-    setRequestedSize(ptr, 0);
+// /*wrapper for setFooter, setFooter == setFreeHeader*/
+void setFreeHeader(sf_block* ptr, size_t block_size, unsigned int prevAlloc, unsigned int nextAlloc, sf_block* prev, sf_block* next){
+    setRequestedSize(ptr, (unsigned int)0);
     setBlockSize(ptr, block_size);
     setPrevAlloc(ptr, prevAlloc);
     setNextAlloc(ptr, nextAlloc);
@@ -108,49 +88,50 @@ void setFreeHeader(sf_block* ptr, size_t block_size, unsigned int prevAlloc, uns
     setPrev(ptr, prev);
 }
 void clearHeader(sf_block* ptr){
-    setRequestedSize(ptr, 0);
-    setBlockSize(ptr, 0);
-    setPrevAlloc(ptr, 0);*
-    setNextAlloc(ptr, 0);
+    setRequestedSize(ptr, (size_t)0);
+    setBlockSize(ptr, (size_t)0);
+    setPrevAlloc(ptr, (unsigned int)0);
+    setNextAlloc(ptr, (unsigned int)0);
 
-    setFooter(ptr, 32, 0, 1);
+    setFooter(ptr, (size_t)32, (unsigned int)0, (unsigned int)1);
 }
 void initPrologue(sf_block* ptr){;
     setRequestedSize(ptr, 0);
-    setBlockSize(ptr, 32);
-    setPrevAlloc(ptr, 1);
-    setNextAlloc(ptr, 0);
+    setBlockSize(ptr, (size_t)32);
+    setPrevAlloc(ptr, (unsigned int)1);
+    setNextAlloc(ptr, (unsigned int)0);
 
-    setFooter(ptr, 32, 0, 1);
+    setFooter(ptr, (size_t)32, (unsigned int)0, (unsigned int)1);
 
 
 }
 void initEpilogue(sf_block* ptr){
     setAllocHeader(ptr, 0, 0, 1, 0);
 }
-void initFreeBlock(sf_block* ptr, sf_block prev, sf_block next, size_t block_size, unsigned prevAlloc, unsigned nextAlloc);{
+void initFreeBlock(sf_block* ptr, sf_block* prev, sf_block* next, size_t block_size, unsigned int prevAlloc, unsigned int nextAlloc){
     setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, prev, next);
-    setFooter(ptr, block_size, prevAlloc, nxtAlloc);
+    setFooter(ptr, block_size, prevAlloc, nextAlloc);
 }
-void initFirstBlock(){
+int initFirstBlock(){
     char* temp = (char*)sf_mem_grow();
-    if(sf_mem_grow == NULL){
-        sf_errno = ENOMEM;
+    if(temp == NULL){
+        //sf_errno = ENOMEM;
         return -1;
     }
-    block_size ptr = (block_size)(temp + 8);
+    sf_block* ptr = (sf_block*)(temp + 8);
 
-    setNext(sf_free_list_head, ptr);
-    setPrev(sf_free_list_head, ptr);
+    setNext(&sf_free_list_head, ptr);
+    setPrev(&sf_free_list_head, ptr);
 
     initPrologue(ptr);
 
 
-    block_size ptr = (block_size)(temp + (PAGE_SZ - 8));
+    ptr = (sf_block*)(temp + (PAGE_SZ - 8));
     initEpilogue(ptr);
 
-    block_size ptr = (block_size)(temp + (40));
-    initFreeBlock(ptr, sf_free_list_head, sf_free_list_head, block_size, 1, nextAlloc);
+    ptr = (sf_block*)(temp + (40));
+    initFreeBlock(ptr, &sf_free_list_head, &sf_free_list_head, PAGE_SZ-8, 1, 0);//check alloc bits
+    return 0;
 }
 void clearBlock(sf_block* ptr){
     memset(ptr, 0,  getBlockSize(ptr));
@@ -160,7 +141,7 @@ unsigned int coaless(sf_block* ptr){
         setBlockSize(ptr, getBlockSize(ptr) + getBlockSize(getPrevInMem(ptr)));
         setPrevAlloc(ptr, 0);
 
-        sf_block prevInMem = getPrevInMem(ptr);
+        sf_block* prevInMem = getPrevInMem(ptr);
 
         setPrev(ptr, getPrev(prevInMem));
         setNext(getPrev(prevInMem), ptr);
@@ -173,7 +154,7 @@ unsigned int coaless(sf_block* ptr){
         setBlockSize(ptr, getBlockSize(ptr) + getBlockSize(getNextInMem(ptr)));
         setNextAlloc(ptr, 0);
 
-        sf_block nextInMem = getNextInMem(ptr);
+        sf_block* nextInMem = getNextInMem(ptr);
 
         setPrev(getNext(nextInMem), ptr);
         setNext(ptr, getNext(nextInMem));
@@ -183,20 +164,42 @@ unsigned int coaless(sf_block* ptr){
         setFooter(ptr, getBlockSize(ptr), getPrevAlloc(ptr), getNextAlloc(ptr));
 
     }
+    return 1;
 }
 
 unsigned int addPage(){
     char* temp = (char*)sf_mem_grow();
-    if(sf_mem_grow == NULL){
+    if(temp == NULL){
         //sf_errno = ENOMEM;
         return -1;
     }
     //clear old epilogue
-    block_size ptr = (block_size)(temp + (PAGE_SZ - 8));
+    sf_block* ptr = (sf_block*)(temp + (PAGE_SZ - 8));
     initEpilogue(ptr);
     ///test heavily
-    block_size ptr = (block_size)(temp + (40));
-    sf_free_list_head->links.prev = ptr;
-    initFreeBlock(ptr, sf_free_list_head, sf_free_list_head.next, block_size, 1, nextAlloc);
+    ptr = (sf_block*)(temp + (40));
+    setPrev(&sf_free_list_head, ptr);
+    initFreeBlock(ptr, &sf_free_list_head, getNext(&sf_free_list_head), (size_t)(PAGE_SZ - 8), 1, nextAlloc);
     coaless(ptr);
+}
+sf_block* splitBlock(sf_block* ptr, size_t block_size, size_t requested_size){
+    unsigned int other_block_size = getBlockSize(ptr) - block_size;
+    //check for splunsigned inters
+    if(other_block_size < 32){
+        return NULL;
+    }
+    //get variables for free block
+    sf_block* prev = getPrev(ptr);
+    sf_block* next = getNext(ptr);
+    unsigned int nextAlloc = getNextAlloc(ptr);
+
+    //set allocated block
+    setBlockSize(ptr, requested_size);
+    setBlockSize(ptr, block_size);
+    setNextAlloc(ptr, (unsigned int)0);
+    //set free block
+    ptr = (sf_block *)(((char*) ptr) + block_size);
+    initFreeBlock(ptr, prev, next, block_size, (unsigned int)1, nextAlloc);
+    return ptr;
+
 }
