@@ -19,7 +19,7 @@ unsigned int getBlockSize(sf_block* ptr){
 }
 unsigned int getRequestedSize(sf_block* ptr){
     printf("getRequestedSize:\t%u\n",ptr->header.requested_size);
-    return (unsigned int) ptr->header.block_size;
+    return (unsigned int) ptr->header.requested_size;
 }
 sf_block *getNext(sf_block* ptr){
     return ptr->body.links.next;
@@ -55,18 +55,22 @@ void setNextAlloc(sf_block* ptr, unsigned int nextAlloc){
     }
     ptr->header.block_size = (unsigned)(ptr->header.block_size |(nextAlloc));
 }
-void setBlockSize(sf_block* ptr, unsigned int block_size){
-    ptr->header.block_size += block_size; //may break prev and next alloc deppending on order of use
+int setBlockSize(sf_block* ptr, unsigned int block_size){
+    if(block_size % 16 != 0){
+        return 0
+    }
+    ptr->header.block_size = block_size; //may break prev and next alloc deppending on order of use
 }
 void setRequestedSize(sf_block* ptr, unsigned int requested_size){
     ptr->header.requested_size = requested_size;
-    printf("setRequestedSize:\t%u\n",ptr->header.requested_size);
 }
 void setPrev(sf_block* ptr, sf_block* prev){
     ptr->body.links.prev = prev;
+    prev->body.links.next = ptr;
 }
 void setNext(sf_block* ptr, sf_block* next){
     ptr->body.links.next = next;
+    next->body.links.prev = ptr;
 }
 
 
@@ -128,7 +132,7 @@ int initFirstBlock(){
     sf_block* ptr = (sf_block*)(temp + 8);
 
     setNext(&sf_free_list_head, ptr);
-    setPrev(&sf_free_list_head, ptr);
+    //setPrev(&sf_free_list_head, ptr); //unneeded
 
     initPrologue(ptr);
 

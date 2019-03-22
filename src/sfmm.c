@@ -11,8 +11,8 @@
 
 
 void* sf_malloc(size_t size) {
-    size_t requested_size = size;
-    size_t block_size = actualSize(size);
+    unsigned int requested_size = size;
+    unsigned int block_size = actualSize(size);
     sf_block* ptr = NULL;
     if(requested_size == 0){
         return NULL;

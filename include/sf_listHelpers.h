@@ -12,7 +12,7 @@ sf_block *getNextInMem(sf_block* ptr);
 sf_block *getPrevInMem(sf_block* ptr);
 void setPrevAlloc(sf_block* ptr, unsigned int prevAlloc);
 void setNextAlloc(sf_block* ptr, unsigned int nextAlloc);
-void setBlockSize(sf_block* ptr, unsigned int block_size);
+int setBlockSize(sf_block* ptr, unsigned int block_size);
 void setRequestedSize(sf_block* ptr, unsigned int requested_size);
 void setPrev(sf_block* ptr, sf_block* prev);
 void setNext(sf_block* ptr, sf_block* next);

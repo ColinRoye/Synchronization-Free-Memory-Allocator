@@ -253,190 +253,95 @@ Test(sf_memsuite_student, getBlockSize_test, .init = sf_mem_init, .fini = sf_mem
 Test(sf_memsuite_student, getRequestedSize_test, .init = sf_mem_init, .fini = sf_mem_fini) {
 	sf_block* block = initEmptyBlock();
 	unsigned int requested_size;
-	unsigned int temp;
-	requested_size = 0x00FFFFFF;
-	printf("requested_size:\t\t%u\n", requested_size);
+	requested_size = 0x3FFFFFFF;
 	setRequestedSize(block, requested_size);
-	temp = getRequestedSize(block);
-	//cr_assert(((int)temp - (int)requested_size) == 0);
-	printf("fff:%u",(temp == requested_size));
+	cr_assert_eq(getRequestedSize(block), requested_size);
 
-	// requested_size = 0xFFFFFFFF;
-	// printf("requested_size:\t%zu\n", requested_size);
-	// setRequestedSize(block, requested_size);
-	// temp = getRequestedSize(block);
-	// cr_assert(getRequestedSize(block) == requested_size);
+
+	requested_size = 0xFFFFFFFF;
+	setRequestedSize(block, requested_size);
+	cr_assert_eq(getRequestedSize(block), requested_size);
+	free(block);
+
+}
+//GET NEXT
+Test(sf_memsuite_student, getnNext_test, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_block* block = initEmptyBlock();
+	sf_block* dummy = initEmptyBlock();
+	setNext(block, dummy);
+	cr_assert_eq(dummy, getNext(block));
+	free(block);
+	free(dummy);
+
+}
+//GET PREV
+Test(sf_memsuite_student, getPrev_test, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_block* block = initEmptyBlock();
+	sf_block* dummy = initEmptyBlock();
+	setPrev(block, dummy);
+	cr_assert_eq(dummy, getPrev(block));
+	free(block);
+	free(dummy);
+}
+//SET ALLOC HEADER
+Test(sf_memsuite_student, getAllocHeader_test, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_block* ptr = initEmptyBlock();
+	unsigned int block_size = 0xFFFFFFFC;
+	unsigned int requested_size = 0xFFFFFFFC;
+	unsigned int nextAlloc = 1;
+	unsigned int prevAlloc = 1;
+
+	setAllocHeader(ptr, block_size, prevAlloc, nextAlloc, requested_size);
+
+	cr_assert_neq(block_size, getBlockSize(ptr));
+	cr_assert_eq(requested_size, getBlockSize(ptr));
+	cr_assert_eq(nextAlloc, getNextAlloc(ptr));
+	cr_assert_eq(prevAlloc, getPrevAlloc(ptr));
+
+	block_size = 32;
+	requested_size = 22;
+	nextAlloc = 0;
+	prevAlloc = 1;
+	setAllocHeader(ptr, block_size, prevAlloc, nextAlloc, requested_size);
+
+	cr_assert_eq(block_size, getBlockSize(ptr));
+	cr_assert_eq(requested_size, getRequestedSize(ptr));
+	cr_assert_eq(nextAlloc, getNextAlloc(ptr));
+	cr_assert_eq(prevAlloc, getPrevAlloc(ptr));
+
+	printf("\nreq:%u\n", requested_size==getRequestedSize(ptr));
+
+
+	block_size = 48;
+	requested_size = 22;
+	nextAlloc = 0;
+	prevAlloc = 1;
+	setAllocHeader(ptr, block_size, prevAlloc, nextAlloc, requested_size);
+	cr_assert_eq(block_size, getBlockSize(ptr));
+	cr_assert_eq(requested_size, getRequestedSize(ptr));
+	cr_assert_eq(nextAlloc, getNextAlloc(ptr));
+	cr_assert_eq(prevAlloc, getPrevAlloc(ptr));
+
+	printf("\nreqest:%u\n", getRequestedSize(ptr));
+
 }
 
-
-
-
-// size_t getRequestedSize(sf_block* ptr);
-// sf_block *getNext(sf_block* ptr);
-// sf_block *getPrev(sf_block* ptr);
-// sf_block *getNextInMem(sf_block* ptr);
-// sf_block *getPrevInMem(sf_block* ptr);
-// void setPrevAlloc(sf_block* ptr, unsigned int prevAlloc);
-// void setNextAlloc(sf_block* ptr, unsigned int nextAlloc);
-// void setBlockSize(sf_block* ptr, size_t block_size);
-// void setRequestedSize(sf_block* ptr, size_t requested_size);
-// void setPrev(sf_block* ptr, sf_block* prev);
-// void setNext(sf_block* ptr, sf_block* next);
-// sf_block* splitBlock(sf_block* ptr, size_t block_size, size_t requested_size);
-// void setFooter(sf_block* ptr, size_t block_size, unsigned int prevAlloc, unsigned int nxtAlloc);
 // void setAllocHeader(sf_block* ptr, size_t block_size, unsigned int prevAlloc, unsigned int nextAlloc, size_t requested_size);
 // void setFreeHeader(sf_block* ptr, size_t block_size, unsigned int prevAlloc, unsigned int nextAlloc, sf_block prev, sf_block next);
+// void setFooter(sf_block* ptr, size_t block_size, unsigned int prevAlloc, unsigned int nxtAlloc);
 // void clearHeader(sf_block* ptr);
+
+// sf_block* splitBlock(sf_block* ptr, size_t block_size, size_t requested_size);
+// int initFirstBlock();
+
+// unsigned int addPage();
+// unsigned int coaless(sf_block* ptr);
+
 // void initPrologue(sf_block* ptr);
 // void initEpilogue(sf_block* ptr);
 // void initFreeBlock(sf_block* ptr, sf_block prev, sf_block next, size_t block_size, unsigned prevAlloc, unsigned nextAlloc);
-// int initFirstBlock();
-// void clearBlock(sf_block* ptr);
-// unsigned int coaless(sf_block* ptr);
-// unsigned int addPage();
 
 
-// Test(sf_memsuite_student, realloc_smaller_block_free_block, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	void *x = sf_malloc(sizeof(double) * 8);
-// 	void *y = sf_realloc(x, sizeof(int));
 
-// 	cr_assert_not_null(y, "y is NULL!");
-
-// 	sf_header *hp = (sf_header *)((char*)y - sizeof(sf_header));
-// 	cr_assert(hp->block_size & THIS_BLOCK_ALLOCATED, "Allocated bit is not set!");
-// 	cr_assert((hp->block_size & BLOCK_SIZE_MASK) == 32, "Realloc'ed block size not what was expected!");
-// 	cr_assert(hp->requested_size == 4, "Requested size not what was expected!");
-
-// 	// After realloc'ing x, we can return a block of size 48 to the freelist.
-// 	// This block will go into the main freelist and be coalesced, as we do not add
-// 	// remainder blocks to a quick list.
-// 	assert_free_block_count(0, 1);
-// 	assert_free_block_count(4016, 1);
-// 	assert_quick_list_block_count(0, 0);
-// }
-// Test(sf_memsuite_student, realloc_smaller_block_free_block, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	void *x = sf_malloc(sizeof(double) * 8);
-// 	void *y = sf_realloc(x, sizeof(int));
-
-// 	cr_assert_not_null(y, "y is NULL!");
-
-// 	sf_header *hp = (sf_header *)((char*)y - sizeof(sf_header));
-// 	cr_assert(hp->block_size & THIS_BLOCK_ALLOCATED, "Allocated bit is not set!");
-// 	cr_assert((hp->block_size & BLOCK_SIZE_MASK) == 32, "Realloc'ed block size not what was expected!");
-// 	cr_assert(hp->requested_size == 4, "Requested size not what was expected!");
-
-// 	// After realloc'ing x, we can return a block of size 48 to the freelist.
-// 	// This block will go into the main freelist and be coalesced, as we do not add
-// 	// remainder blocks to a quick list.
-// 	assert_free_block_count(0, 1);
-// 	assert_free_block_count(4016, 1);
-// 	assert_quick_list_block_count(0, 0);
-// }
-// Test(sf_memsuite_student, realloc_smaller_block_free_block, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	void *x = sf_malloc(sizeof(double) * 8);
-// 	void *y = sf_realloc(x, sizeof(int));
-
-// 	cr_assert_not_null(y, "y is NULL!");
-
-// 	sf_header *hp = (sf_header *)((char*)y - sizeof(sf_header));
-// 	cr_assert(hp->block_size & THIS_BLOCK_ALLOCATED, "Allocated bit is not set!");
-// 	cr_assert((hp->block_size & BLOCK_SIZE_MASK) == 32, "Realloc'ed block size not what was expected!");
-// 	cr_assert(hp->requested_size == 4, "Requested size not what was expected!");
-
-// 	// After realloc'ing x, we can return a block of size 48 to the freelist.
-// 	// This block will go into the main freelist and be coalesced, as we do not add
-// 	// remainder blocks to a quick list.
-// 	assert_free_block_count(0, 1);
-// 	assert_free_block_count(4016, 1);
-// 	assert_quick_list_block_count(0, 0);
-// }
-// Test(sf_memsuite_student, realloc_smaller_block_free_block, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	void *x = sf_malloc(sizeof(double) * 8);
-// 	void *y = sf_realloc(x, sizeof(int));
-
-// 	cr_assert_not_null(y, "y is NULL!");
-
-// 	sf_header *hp = (sf_header *)((char*)y - sizeof(sf_header));
-// 	cr_assert(hp->block_size & THIS_BLOCK_ALLOCATED, "Allocated bit is not set!");
-// 	cr_assert((hp->block_size & BLOCK_SIZE_MASK) == 32, "Realloc'ed block size not what was expected!");
-// 	cr_assert(hp->requested_size == 4, "Requested size not what was expected!");
-
-// 	// After realloc'ing x, we can return a block of size 48 to the freelist.
-// 	// This block will go into the main freelist and be coalesced, as we do not add
-// 	// remainder blocks to a quick list.
-// 	assert_free_block_count(0, 1);
-// 	assert_free_block_count(4016, 1);
-// 	assert_quick_list_block_count(0, 0);
-// }
-// Test(sf_memsuite_student, realloc_smaller_block_free_block, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	void *x = sf_malloc(sizeof(double) * 8);
-// 	void *y = sf_realloc(x, sizeof(int));
-
-// 	cr_assert_not_null(y, "y is NULL!");
-
-// 	sf_header *hp = (sf_header *)((char*)y - sizeof(sf_header));
-// 	cr_assert(hp->block_size & THIS_BLOCK_ALLOCATED, "Allocated bit is not set!");
-// 	cr_assert((hp->block_size & BLOCK_SIZE_MASK) == 32, "Realloc'ed block size not what was expected!");
-// 	cr_assert(hp->requested_size == 4, "Requested size not what was expected!");
-
-// 	// After realloc'ing x, we can return a block of size 48 to the freelist.
-// 	// This block will go into the main freelist and be coalesced, as we do not add
-// 	// remainder blocks to a quick list.
-// 	assert_free_block_count(0, 1);
-// 	assert_free_block_count(4016, 1);
-// 	assert_quick_list_block_count(0, 0);
-// }
-// Test(sf_memsuite_student, realloc_smaller_block_free_block, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	void *x = sf_malloc(sizeof(double) * 8);
-// 	void *y = sf_realloc(x, sizeof(int));
-
-// 	cr_assert_not_null(y, "y is NULL!");
-
-// 	sf_header *hp = (sf_header *)((char*)y - sizeof(sf_header));
-// 	cr_assert(hp->block_size & THIS_BLOCK_ALLOCATED, "Allocated bit is not set!");
-// 	cr_assert((hp->block_size & BLOCK_SIZE_MASK) == 32, "Realloc'ed block size not what was expected!");
-// 	cr_assert(hp->requested_size == 4, "Requested size not what was expected!");
-
-// 	// After realloc'ing x, we can return a block of size 48 to the freelist.
-// 	// This block will go into the main freelist and be coalesced, as we do not add
-// 	// remainder blocks to a quick list.
-// 	assert_free_block_count(0, 1);
-// 	assert_free_block_count(4016, 1);
-// 	assert_quick_list_block_count(0, 0);
-// }
-// Test(sf_memsuite_student, realloc_smaller_block_free_block, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	void *x = sf_malloc(sizeof(double) * 8);
-// 	void *y = sf_realloc(x, sizeof(int));
-
-// 	cr_assert_not_null(y, "y is NULL!");
-
-// 	sf_header *hp = (sf_header *)((char*)y - sizeof(sf_header));
-// 	cr_assert(hp->block_size & THIS_BLOCK_ALLOCATED, "Allocated bit is not set!");
-// 	cr_assert((hp->block_size & BLOCK_SIZE_MASK) == 32, "Realloc'ed block size not what was expected!");
-// 	cr_assert(hp->requested_size == 4, "Requested size not what was expected!");
-
-// 	// After realloc'ing x, we can return a block of size 48 to the freelist.
-// 	// This block will go into the main freelist and be coalesced, as we do not add
-// 	// remainder blocks to a quick list.
-// 	assert_free_block_count(0, 1);
-// 	assert_free_block_count(4016, 1);
-// 	assert_quick_list_block_count(0, 0);
-// }
-// Test(sf_memsuite_student, realloc_smaller_block_free_block, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	void *x = sf_malloc(sizeof(double) * 8);
-// 	void *y = sf_realloc(x, sizeof(int));
-
-// 	cr_assert_not_null(y, "y is NULL!");
-
-// 	sf_header *hp = (sf_header *)((char*)y - sizeof(sf_header));
-// 	cr_assert(hp->block_size & THIS_BLOCK_ALLOCATED, "Allocated bit is not set!");
-// 	cr_assert((hp->block_size & BLOCK_SIZE_MASK) == 32, "Realloc'ed block size not what was expected!");
-// 	cr_assert(hp->requested_size == 4, "Requested size not what was expected!");
-
-// 	// After realloc'ing x, we can return a block of size 48 to the freelist.
-// 	// This block will go into the main freelist and be coalesced, as we do not add
-// 	// remainder blocks to a quick list.
-// 	assert_free_block_count(0, 1);
-// 	assert_free_block_count(4016, 1);
-// 	assert_quick_list_block_count(0, 0);
-// }
+sf_block *getNextInMem(sf_block* ptr);
+sf_block *getPrevInMem(sf_block* ptr);
