@@ -1,5 +1,7 @@
 #include <stdio.h>
+#include <errno.h>
 #include "sfmm.h"
+#include "sf_listHelpers.h"
 
 int main(int argc, char const *argv[]) {
     sf_mem_init();

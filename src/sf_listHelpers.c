@@ -1,22 +1,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include "sfmm.h"
 #include "debug.h"
 
 
 unsigned int getNextAlloc(sf_block* ptr){
+    debug("nextAlloc:\t%u\n", ptr->header.block_size);
     return (unsigned int) (ptr->header.block_size & 1);
 
 }
 unsigned int getPrevAlloc(sf_block* ptr){
-    return (unsigned int) (ptr->header.block_size & 2) >> 1;
+    return (unsigned int) (ptr->header.block_size & 0x2) >> 1;
 }
-size_t getBlockSize(sf_block* ptr){
-    return (size_t)ptr->header.block_size & 0xFFFFFFFC;
+unsigned int getBlockSize(sf_block* ptr){
+    return (unsigned int)ptr->header.block_size & 0xFFFFFFFC;
 }
-size_t getRequestedSize(sf_block* ptr){
-    return (size_t) ptr->header.block_size;
+unsigned int getRequestedSize(sf_block* ptr){
+    printf("getRequestedSize:\t%u\n",ptr->header.requested_size);
+    return (unsigned int) ptr->header.block_size;
 }
 sf_block *getNext(sf_block* ptr){
     return ptr->body.links.next;
@@ -32,28 +35,32 @@ sf_block *getNextInMem(sf_block* ptr){
 }
 sf_block *getPrevInMem(sf_block* ptr){
     if(!getPrevAlloc(ptr)){
-        size_t prev_block_size = getBlockSize((sf_block *)(char*)ptr - 8);
+        unsigned int prev_block_size = getBlockSize((sf_block *)(char*)ptr - 8);
         return (sf_block *)((char*)ptr - prev_block_size);
     }
     return NULL;
 }
 void setPrevAlloc(sf_block* ptr, unsigned int prevAlloc){
+     if(prevAlloc > 1){
+        debug("WARN: prevAlloc not set!");
+        return;
+    }
     ptr->header.block_size = (unsigned)(ptr->header.block_size |(prevAlloc << 1));
 
 }
 void setNextAlloc(sf_block* ptr, unsigned int nextAlloc){
-    ptr->header.block_size = (unsigned)(ptr->header.block_size |(nextAlloc << 1));
+    if(nextAlloc > 1){
+        debug("WARN: nextAlloc not set!");
+        return;
+    }
+    ptr->header.block_size = (unsigned)(ptr->header.block_size |(nextAlloc));
 }
-void setBlockSize(sf_block* ptr, size_t block_size){
-    unsigned prevAlloc = getPrevAlloc(ptr);
-    unsigned nextAlloc = getPrevAlloc(ptr);
-
-    setBlockSize(ptr, (unsigned)(ptr->header.block_size));
-    setNextAlloc(ptr, nextAlloc);
-    setPrevAlloc(ptr, prevAlloc);
+void setBlockSize(sf_block* ptr, unsigned int block_size){
+    ptr->header.block_size += block_size; //may break prev and next alloc deppending on order of use
 }
-void setRequestedSize(sf_block* ptr, size_t requested_size){
-    ptr->header.requested_size = (unsigned)requested_size;
+void setRequestedSize(sf_block* ptr, unsigned int requested_size){
+    ptr->header.requested_size = requested_size;
+    printf("setRequestedSize:\t%u\n",ptr->header.requested_size);
 }
 void setPrev(sf_block* ptr, sf_block* prev){
     ptr->body.links.prev = prev;
@@ -63,14 +70,14 @@ void setNext(sf_block* ptr, sf_block* next){
 }
 
 
-void setFooter(sf_block* ptr, size_t block_size, unsigned int prevAlloc, unsigned int nextAlloc){
+void setFooter(sf_block* ptr, unsigned int block_size, unsigned int prevAlloc, unsigned int nextAlloc){
     ptr = (sf_block *)(((char*)ptr) + (block_size -8));
     setRequestedSize(ptr, (unsigned int)0);
     setBlockSize(ptr, block_size);
     setPrevAlloc(ptr, prevAlloc);
     setNextAlloc(ptr, nextAlloc);
 }
-void setAllocHeader(sf_block* ptr, size_t block_size, unsigned int prevAlloc, unsigned int nextAlloc, size_t requested_size){
+void setAllocHeader(sf_block* ptr, unsigned int block_size, unsigned int prevAlloc, unsigned int nextAlloc, unsigned int requested_size){
 
     setRequestedSize(ptr, requested_size);
 
@@ -79,7 +86,7 @@ void setAllocHeader(sf_block* ptr, size_t block_size, unsigned int prevAlloc, un
     setNextAlloc(ptr,nextAlloc);
 }
 // /*wrapper for setFooter, setFooter == setFreeHeader*/
-void setFreeHeader(sf_block* ptr, size_t block_size, unsigned int prevAlloc, unsigned int nextAlloc, sf_block* prev, sf_block* next){
+void setFreeHeader(sf_block* ptr, unsigned int block_size, unsigned int prevAlloc, unsigned int nextAlloc, sf_block* prev, sf_block* next){
     setRequestedSize(ptr, (unsigned int)0);
     setBlockSize(ptr, block_size);
     setPrevAlloc(ptr, prevAlloc);
@@ -88,27 +95,27 @@ void setFreeHeader(sf_block* ptr, size_t block_size, unsigned int prevAlloc, uns
     setPrev(ptr, prev);
 }
 void clearHeader(sf_block* ptr){
-    setRequestedSize(ptr, (size_t)0);
-    setBlockSize(ptr, (size_t)0);
+    setRequestedSize(ptr, (unsigned int)0);
+    setBlockSize(ptr, (unsigned int)0);
     setPrevAlloc(ptr, (unsigned int)0);
     setNextAlloc(ptr, (unsigned int)0);
 
-    setFooter(ptr, (size_t)32, (unsigned int)0, (unsigned int)1);
+    setFooter(ptr, (unsigned int)32, (unsigned int)0, (unsigned int)1);
 }
 void initPrologue(sf_block* ptr){;
     setRequestedSize(ptr, 0);
-    setBlockSize(ptr, (size_t)32);
+    setBlockSize(ptr, (unsigned int)32);
     setPrevAlloc(ptr, (unsigned int)1);
     setNextAlloc(ptr, (unsigned int)0);
 
-    setFooter(ptr, (size_t)32, (unsigned int)0, (unsigned int)1);
+    setFooter(ptr, (unsigned int)32, (unsigned int)0, (unsigned int)1);
 
 
 }
 void initEpilogue(sf_block* ptr){
     setAllocHeader(ptr, 0, 0, 1, 0);
 }
-void initFreeBlock(sf_block* ptr, sf_block* prev, sf_block* next, size_t block_size, unsigned int prevAlloc, unsigned int nextAlloc){
+void initFreeBlock(sf_block* ptr, sf_block* prev, sf_block* next, unsigned int block_size, unsigned int prevAlloc, unsigned int nextAlloc){
     setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, prev, next);
     setFooter(ptr, block_size, prevAlloc, nextAlloc);
 }
@@ -179,10 +186,11 @@ unsigned int addPage(){
     ///test heavily
     ptr = (sf_block*)(temp + (40));
     setPrev(&sf_free_list_head, ptr);
-    initFreeBlock(ptr, &sf_free_list_head, getNext(&sf_free_list_head), (size_t)(PAGE_SZ - 8), 1, nextAlloc);
+    initFreeBlock(ptr, &sf_free_list_head, getNext(&sf_free_list_head), (unsigned int)(PAGE_SZ - 8), 1, 1);//fix
     coaless(ptr);
+    return 1;
 }
-sf_block* splitBlock(sf_block* ptr, size_t block_size, size_t requested_size){
+sf_block* splitBlock(sf_block* ptr, unsigned int block_size, unsigned int requested_size){
     unsigned int other_block_size = getBlockSize(ptr) - block_size;
     //check for splunsigned inters
     if(other_block_size < 32){
