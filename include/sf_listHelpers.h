@@ -1,0 +1,34 @@
+
+#ifndef SF_LF_H
+#define SF_LF_H
+#include "sfmm.h"
+
+unsigned int getNextAlloc(sf_block ptr);
+unsigned int getPrevAlloc(sf_block ptr);
+size_t getBlockSize(sf_block ptr);
+size_t getRequestedSize(sf_block ptr);
+sf_block getNext(sf_block ptr);
+sf_block getPrev(sf_block ptr);
+sf_block getNextInMem(sf_block ptr);
+sf_block getPrevInMem(sf_block ptr);
+void setPrevAlloc(sf_block ptr, unsigned int prevAlloc);
+void setNextAlloc(sf_block ptr, unsigned int nextAlloc);
+void setBlockSize(sf_block ptr, size_t block_size);
+void setRequestedSize(sf_block ptr, size_t requested_size);
+void setPrev(sf_block ptr, sf_block prev);
+void setNext(sf_block ptr, sf_block next);
+
+void splitBlock(sf_block ptr, size_t block_size, size_t requested_size);
+void setFooter(sf_block ptr, size_t block_size, unsigned int prevAlloc, unsigned int nxtAlloc);
+void setAllocHeader(sf_block ptr, size_t block_size, unsigned int prevAlloc, unsigned int nextAlloc, size_t requested_size);
+void setFreeHeader(sf_block ptr, size_t block_size, unsigned int prevAlloc, unsigned int nextAlloc, sf_block prev, sf_block next);
+void clearHeader();
+void initPrologue(sf_block ptr);
+void initEpilogue(sf_block ptr);
+void initFreeBlock(sf_block ptr, sf_block prev, sf_block next, size_t block_size, unsigned prevAlloc, unsigned nextAlloc);
+void initFirstBlock();
+void clearBlock(sf_block ptr);
+unsigned int coaless(sf_block ptr);
+
+unsigned int addPage();
+#endif

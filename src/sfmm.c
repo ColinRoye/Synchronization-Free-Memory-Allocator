@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "debug.h"
+#include "sfmm.h"
 
 void* sf_malloc(size_t size) {
     void* ptr;
@@ -40,3 +41,4 @@ void* sf_realloc(void *ptr, size_t size) {
 void sf_free(void *ptr) {
     return;
 }
+
