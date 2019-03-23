@@ -75,29 +75,42 @@ void setNext(sf_block* ptr, sf_block* next){
 }
 
 
-void setFooter(sf_block* ptr, unsigned int block_size, unsigned int prevAlloc, unsigned int nextAlloc){
+int setFooter(sf_block* ptr, unsigned int block_size, unsigned int prevAlloc, unsigned int nextAlloc){
     ptr = (sf_block *)(((char*)ptr) + (block_size -8));
+    if(setBlockSize(ptr, block_size) == 0){
+        debug("setFooter: bad block size");
+        return 0;
+    }
+
     setRequestedSize(ptr, (unsigned int)0);
-    setBlockSize(ptr, block_size);
     setPrevAlloc(ptr, prevAlloc);
     setNextAlloc(ptr, nextAlloc);
+    return 1;
 }
-void setAllocHeader(sf_block* ptr, unsigned int block_size, unsigned int prevAlloc, unsigned int nextAlloc, unsigned int requested_size){
+int setAllocHeader(sf_block* ptr, unsigned int block_size, unsigned int prevAlloc, unsigned int nextAlloc, unsigned int requested_size){
 
+    if(setBlockSize(ptr, block_size) == 0){
+        debug("setFooter: bad block size");
+        return 0;
+    }
     setRequestedSize(ptr, requested_size);
 
-    setBlockSize(ptr, block_size);
     setPrevAlloc(ptr, prevAlloc);
     setNextAlloc(ptr,nextAlloc);
+    return 1;
 }
 // /*wrapper for setFooter, setFooter == setFreeHeader*/
-void setFreeHeader(sf_block* ptr, unsigned int block_size, unsigned int prevAlloc, unsigned int nextAlloc, sf_block* prev, sf_block* next){
+int setFreeHeader(sf_block* ptr, unsigned int block_size, unsigned int prevAlloc, unsigned int nextAlloc, sf_block* prev, sf_block* next){
+    if(setBlockSize(ptr, block_size) == 0){
+        debug("setFooter: bad block size");
+        return 0;
+    }
     setRequestedSize(ptr, (unsigned int)0);
-    setBlockSize(ptr, block_size);
     setPrevAlloc(ptr, prevAlloc);
     setNextAlloc(ptr, nextAlloc);
     setNext(ptr, next);
     setPrev(ptr, prev);
+    return 1;
 }
 void clearHeader(sf_block* ptr){
     setRequestedSize(ptr, (unsigned int)0);
@@ -154,7 +167,10 @@ void clearBlock(sf_block* ptr){
 }
 unsigned int coaless(sf_block* ptr){
     if(getPrevAlloc(ptr)){
-        setBlockSize(ptr, getBlockSize(ptr) + getBlockSize(getPrevInMem(ptr)));
+
+        if(setBlockSize(ptr, getBlockSize(ptr) + getBlockSize(getPrevInMem(ptr))) == 0){
+            return 0;
+        }
         setPrevAlloc(ptr, 0);
 
         sf_block* prevInMem = getPrevInMem(ptr);
@@ -167,7 +183,9 @@ unsigned int coaless(sf_block* ptr){
         setFooter(ptr, getBlockSize(ptr), getPrevAlloc(ptr), getNextAlloc(ptr));
     }
     if(getNextAlloc(ptr)){
-        setBlockSize(ptr, getBlockSize(ptr) + getBlockSize(getNextInMem(ptr)));
+        if(setBlockSize(ptr, getBlockSize(ptr) + getBlockSize(getNextInMem(ptr))) == 0){
+            return 0;
+        }
         setNextAlloc(ptr, 0);
 
         sf_block* nextInMem = getNextInMem(ptr);
