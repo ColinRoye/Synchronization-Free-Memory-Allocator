@@ -105,19 +105,23 @@ void clearHeader(sf_block* ptr){
     setPrevAlloc(ptr, (unsigned int)0);
     setNextAlloc(ptr, (unsigned int)0);
 
-    setFooter(ptr, (unsigned int)32, (unsigned int)0, (unsigned int)1);
+    //setFooter(ptr, (unsigned int)32, (unsigned int)0, (unsigned int)1);
 }
-void initPrologue(sf_block* ptr){;
+void initPrologue(sf_block* ptr){
+    char* temp = (char*) ptr;
+    ptr = (sf_block*)(temp+8);
     setRequestedSize(ptr, 0);
     setBlockSize(ptr, (unsigned int)32);
-    setPrevAlloc(ptr, (unsigned int)1);
-    setNextAlloc(ptr, (unsigned int)0);
+    setPrevAlloc(ptr, (unsigned int)0);
+    setNextAlloc(ptr, (unsigned int)1);
 
     setFooter(ptr, (unsigned int)32, (unsigned int)0, (unsigned int)1);
 
 
 }
 void initEpilogue(sf_block* ptr){
+    char* temp = (char*)ptr;
+    ptr = (sf_block*)(temp + (PAGE_SZ-8));
     setAllocHeader(ptr, 0, 0, 1, 0);
 }
 void initFreeBlock(sf_block* ptr, sf_block* prev, sf_block* next, unsigned int block_size, unsigned int prevAlloc, unsigned int nextAlloc){
@@ -146,7 +150,7 @@ int initFirstBlock(){
     return 0;
 }
 void clearBlock(sf_block* ptr){
-    memset(ptr, 0,  getBlockSize(ptr));
+    memset((void*)ptr, 0,  getBlockSize(ptr));
 }
 unsigned int coaless(sf_block* ptr){
     if(getPrevAlloc(ptr)){

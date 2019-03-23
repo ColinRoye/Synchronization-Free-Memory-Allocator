@@ -7,19 +7,18 @@
 
 #include "debug.h"
 #include "sfmm.h"
-#include "sf_listHelpers.h"
-#include "sfmm_testHelpers.h"
+
 
 //#include "sf_freeHelpers.h"
 
 #define MIN_BLOCK_SIZE (32)
 
-/*
- * Assert the total number of free blocks of a specified size,
- * including quick lists.  If size == 0, then assert the total number
- * of all free blocks.  Note that blocks in quick lists are still marked
- * as allocated, even though they are technically free.
- */
+// /*
+//  * Assert the total number of free blocks of a specified size,
+//  * including quick lists.  If size == 0, then assert the total number
+//  * of all free blocks.  Note that blocks in quick lists are still marked
+//  * as allocated, even though they are technically free.
+//  */
 // void assert_free_block_count(size_t size, int count) {
 //     int cnt = 0;
 //     sf_block *bp = sf_free_list_head.body.links.next;
@@ -225,8 +224,8 @@
 //DO NOT DELETE THESE COMMENTS
 //############################################
 
-
-
+#include "sf_listHelpers.h"
+#include "sfmm_testHelpers.h"
 //GET PREV ALLOC
 Test(sf_memsuite_student, getPrevAlloc_test, .init = sf_mem_init, .fini = sf_mem_fini) {
 	sf_block* block = initEmptyBlock();
@@ -357,9 +356,73 @@ Test(sf_memsuite_student, setFreeHeader_test, .init = sf_mem_init, .fini = sf_me
 
 
 }
+//CLEAR BLOCK
+Test(sf_memsuite_student, clearHeader_test, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_block* ptr = initEmptyBlock();
+	unsigned int block_size = 0xFFFFFFFC;
+	unsigned int nextAlloc = 1;
+	unsigned int prevAlloc = 1;
+
+	setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, ptr, ptr);
+	clearHeader(ptr);
+
+	cr_assert_eq(getBlockSize(ptr), 0);
+	cr_assert_eq(getPrevAlloc(ptr), 0);
+	cr_assert_eq(getNextAlloc(ptr), 0);
+
+	block_size = 32;
+	nextAlloc = 0;
+	prevAlloc = 1;
+	setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, ptr, ptr);
+	clearHeader(ptr);
+	cr_assert_eq(getBlockSize(ptr), 0);
+	cr_assert_eq(getPrevAlloc(ptr), 0);
+	cr_assert_eq(getNextAlloc(ptr), 0);
+
+
+
+	// block_size = 48;
+	// nextAlloc = 0;
+	// prevAlloc = 1;
+	// setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, ptr, ptr);
+	// clearHeader(ptr);
+	// cr_assert_eq(block_size, 0);
+	// cr_assert_eq(nextAlloc, 0);
+	// cr_assert_eq(prevAlloc, 0);
+
+
+}
+//INIT  EPILOGUE
+Test(sf_memsuite_student, initEpilogue_test, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_block* ptr = sf_mem_grow();
+	initEpilogue(ptr);
+	char* temp = (char*)ptr;
+	ptr = (sf_block*)(temp + (PAGE_SZ - 8));
+	cr_assert_eq(getNextAlloc(ptr), 1);
+	//cr_assert_eq(getPrevAlloc(ptr), 1);
+	cr_assert_eq(getBlockSize(ptr), 0);
+
+
+
+}
+//INIT PROLOGUE
+Test(sf_memsuite_student, initPrologue_test, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_block* ptr = sf_mem_grow();
+	initPrologue(ptr);
+	char* temp = (char*)ptr;
+	ptr = (sf_block*)(temp + 8);
+	cr_assert_eq(getNextAlloc(ptr), 1);
+	cr_assert_eq(getPrevAlloc(ptr), 0);
+	cr_assert_eq(getBlockSize(ptr), 32);
+
+
+
+}
+// void initPrologue(sf_block* ptr);
+
+
 
 // void setFooter(sf_block* ptr, size_t block_size, unsigned int prevAlloc, unsigned int nxtAlloc);
-// void clearHeader(sf_block* ptr);
 
 // sf_block* splitBlock(sf_block* ptr, size_t block_size, size_t requested_size);
 // int initFirstBlock();
@@ -373,5 +436,5 @@ Test(sf_memsuite_student, setFreeHeader_test, .init = sf_mem_init, .fini = sf_me
 
 
 
-sf_block *getNextInMem(sf_block* ptr);
-sf_block *getPrevInMem(sf_block* ptr);
+// sf_block *getNextInMem(sf_block* ptr);
+// sf_block *getPrevInMem(sf_block* ptr);
