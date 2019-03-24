@@ -17,7 +17,7 @@ int actualSize(unsigned int size){
 }
 sf_block* getFreeBlock(unsigned int requested_size){
     unsigned int block_size = actualSize(requested_size);
-    sf_block* current = getNext((&sf_free_list_head));
+    sf_block* current = getNext(&sf_free_list_head);
     while(current != &sf_free_list_head){
         if(getBlockSize(current) >= block_size){
             splitBlock(current, block_size, requested_size);
