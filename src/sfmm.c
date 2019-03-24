@@ -27,10 +27,10 @@ void* sf_malloc(size_t size) {
     }
 
     if((ptr = getQuickBlock(requested_size)) != NULL){
-        return (((char*)ptr)+8);
+        return ptr;
     }
     if((ptr = getFreeBlock(requested_size)) != NULL){
-        return (((char*)ptr)+8);
+        return ptr;
     }
 
     if(addPage() == 0){

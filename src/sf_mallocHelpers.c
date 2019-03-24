@@ -20,7 +20,7 @@ sf_block* getFreeBlock(unsigned int requested_size){
     sf_block* current = getNext(&sf_free_list_head);
     while(current != &sf_free_list_head){
         if(getBlockSize(current) >= block_size){
-            splitBlock(current, block_size, requested_size);
+            current = splitBlock(current, block_size, requested_size);
             break;
         }
         current = getNext(current);

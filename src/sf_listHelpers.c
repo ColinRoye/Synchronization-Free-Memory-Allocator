@@ -164,7 +164,7 @@ int initFirstBlock(){
     initEpilogue(ptr);
 
     ptr = (sf_block*)(temp + (40));
-    initFreeBlock(ptr, &sf_free_list_head, &sf_free_list_head, PAGE_SZ-8, 1, 0);//check alloc bits
+    initFreeBlock(ptr, &sf_free_list_head, &sf_free_list_head, PAGE_SZ-48, 1, 0);//check alloc bits
     return 0;
 }
 void clearBlock(sf_block* ptr){
@@ -239,11 +239,10 @@ sf_block* splitBlock(sf_block* ptr, unsigned int block_size, unsigned int reques
     setNextAlloc(ptr, (unsigned int)0);
     //setPrevAlloc(ptr, getPrevAlloc(ptr));
     //set free block
-    sf_block* temp;
-    temp = (sf_block *)(((char*) ptr) + block_size);
-    initFreeBlock(temp, prev, next, block_size, (unsigned int)1, nextAlloc);
-    void* test = (void*)((((char*) ptr))+8);
-    printBlockSize(test);
+    char* temp = (char*) ptr;
+    sf_block* other_ptr = (sf_block *)(temp+getBlockSize(ptr));
+    initFreeBlock(other_ptr, prev, next, block_size, (unsigned int)1, nextAlloc);
+
     return ptr;
 
 }
