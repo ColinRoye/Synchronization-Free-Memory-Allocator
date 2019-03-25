@@ -25,12 +25,21 @@ void* sf_malloc(size_t size) {
         // return exit failure or NULL?
         return NULL;
     }
+    char* temp;
 
     if((ptr = getQuickBlock(requested_size)) != NULL){
-        return ptr;
+        temp = (char*) ptr;
+        temp += 8;
+        memset(temp, 0,(getBlockSize(ptr) - 16));
+
+        return temp;
     }
     if((ptr = getFreeBlock(requested_size)) != NULL){
-        return ptr;
+
+        temp = (char*) ptr;
+        temp += 8;
+        memset(temp, 0,(getBlockSize(ptr) - 16));
+        return temp;
     }
 
     if(addPage() == 0){
@@ -39,14 +48,21 @@ void* sf_malloc(size_t size) {
     // if(sf_errno == NOMEM{sear}){
     //     //return exit failure or NULL?
     // }
-    //return sf_malloc(requested_size);
-    return NULL;
+    return sf_malloc(requested_size);
+   // return NULL;
 }
 
 void* sf_realloc(void *ptr, size_t size) {
     return NULL;
 }
 void sf_free(void *ptr) {
-    return;
+    // initFreeBlock(ptr, getBlockSize(ptr));
+    // ptr = coaless(ptr)
+    // if(addToQuickList()){
+    //     return;
+    // }
+    // setNext(ptr, sf_free_list_head);
+
+    // return;
 }
 

@@ -16,7 +16,7 @@ int setBlockSize(sf_block* ptr, unsigned int block_size);
 void setRequestedSize(sf_block* ptr, unsigned int requested_size);
 void setPrev(sf_block* ptr, sf_block* prev);
 void setNext(sf_block* ptr, sf_block* next);
-sf_block* splitBlock(sf_block* ptr, unsigned int block_size, unsigned int requested_size);
+sf_block* splitBlock(sf_block* ptr, unsigned int block_size, unsigned int requested_size, unsigned int total_size);
 int setFooter(sf_block* ptr, unsigned int block_size, unsigned int prevAlloc, unsigned int nxtAlloc);
 int setAllocHeader(sf_block* ptr, unsigned int block_size, unsigned int prevAlloc, unsigned int nextAlloc, unsigned int requested_size);
 int setFreeHeader(sf_block* ptr, unsigned int block_size, unsigned int prevAlloc, unsigned int nextAlloc, sf_block* prev, sf_block* next);

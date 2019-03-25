@@ -76,7 +76,8 @@ void setNext(sf_block* ptr, sf_block* next){
 
 
 int setFooter(sf_block* ptr, unsigned int block_size, unsigned int prevAlloc, unsigned int nextAlloc){
-    ptr = (sf_block *)(((char*)ptr) + (block_size -8));
+    char *temp = (char *)ptr;
+    ptr = (sf_block *)(temp + (block_size -8));
     if(setBlockSize(ptr, block_size) == 0){
         debug("setFooter: bad block size");
         return 0;
@@ -149,6 +150,9 @@ void initFreeBlock(sf_block* ptr, sf_block* prev, sf_block* next, unsigned int b
     setFooter(ptr, block_size, prevAlloc, nextAlloc);
     setNext(ptr, next);
     setPrev(ptr, prev);
+
+    // setNext(&sf_free_list_head, ptr);
+    // setPrev(ptr, &sf_free_list_head);
 }
 int initFirstBlock(){
     char* temp = (char*)sf_mem_grow();
@@ -181,7 +185,7 @@ unsigned int coaless(sf_block* ptr){
         sf_block* prevInMem = getPrevInMem(ptr);
 
         setPrev(ptr, getPrev(prevInMem));
-        setNext(getPrev(prevInMem), ptr);
+        //setNext(getPrev(prevInMem), ptr);
 
         clearBlock(getPrevInMem(ptr));//can you have 2 free blocks next to eachother?
 
@@ -195,7 +199,7 @@ unsigned int coaless(sf_block* ptr){
 
         sf_block* nextInMem = getNextInMem(ptr);
 
-        setPrev(getNext(nextInMem), ptr);
+        //setPrev(getNext(nextInMem), ptr);
         setNext(ptr, getNext(nextInMem));
 
         clearBlock(getNextInMem(ptr));
@@ -222,7 +226,7 @@ unsigned int addPage(){
     coaless(ptr);
     return 1;
 }
-sf_block* splitBlock(sf_block* ptr, unsigned int block_size, unsigned int requested_size){
+sf_block* splitBlock(sf_block* ptr, unsigned int block_size, unsigned int requested_size, unsigned int total_size){
     unsigned int other_block_size = getBlockSize(ptr) - block_size;
     //check for splunsigned inters
     if(other_block_size < 32){
@@ -231,6 +235,7 @@ sf_block* splitBlock(sf_block* ptr, unsigned int block_size, unsigned int reques
     //get variables for free block
     sf_block* prev = getPrev(ptr);
     sf_block* next = getNext(ptr);
+
     unsigned int nextAlloc = getNextAlloc(ptr);
 
     //set allocated block
@@ -240,9 +245,11 @@ sf_block* splitBlock(sf_block* ptr, unsigned int block_size, unsigned int reques
     //setPrevAlloc(ptr, getPrevAlloc(ptr));
     //set free block
     char* temp = (char*) ptr;
-    sf_block* other_ptr = (sf_block *)(temp+getBlockSize(ptr));
-    initFreeBlock(other_ptr, prev, next, block_size, (unsigned int)1, nextAlloc);
-
+    sf_block* other_ptr = (sf_block *)(temp + getBlockSize(ptr));
+    initFreeBlock(other_ptr, prev, next, (total_size - block_size), (unsigned int)1, nextAlloc);//err
+    printBlockSize(other_ptr);
+    printBlockSize(ptr);
+    setNext(&sf_free_list_head, other_ptr);
     return ptr;
 
 }
@@ -250,5 +257,8 @@ void initQuickLists(){
     for(int i = 0; i < NUM_QUICK_LISTS; i++){
         sf_quick_lists[i].length = 0;
     }
+
+}
+int isMatch(sf_block* ptr){
 
 }
