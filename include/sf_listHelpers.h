@@ -3,6 +3,7 @@
 #define SF_LF_H
 #include "sfmm.h"
 unsigned int getNextAlloc(sf_block* ptr);
+unsigned int getAlloc(sf_block* ptr);
 unsigned int getPrevAlloc(sf_block* ptr);
 unsigned int getBlockSize(sf_block* ptr);
 unsigned int getRequestedSize(sf_block* ptr);
@@ -23,11 +24,15 @@ int setFreeHeader(sf_block* ptr, unsigned int block_size, unsigned int prevAlloc
 void clearHeader(sf_block* ptr);
 void initPrologue(sf_block* ptr);
 void initEpilogue(sf_block* ptr);
-void initFreeBlock(sf_block* ptr, sf_block prev, sf_block next, unsigned int block_size, unsigned prevAlloc, unsigned nextAlloc);
+void initFreeBlock(sf_block* ptr, sf_block* prev, sf_block* next, unsigned int block_size, unsigned prevAlloc, unsigned nextAlloc);
 int initFirstBlock();
 void clearBlock(sf_block* ptr);
 unsigned int coaless(sf_block* ptr);
 unsigned int addPage();
 void initQuickLists();
 void printBlockSize(void* ptr);
+int getListBlockSize(int i);
+void emptyQL(int i);
+void setNextQL(sf_block* ptr, int i);
+int addToQuickList(sf_block* ptr);
 #endif

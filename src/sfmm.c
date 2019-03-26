@@ -30,7 +30,7 @@ void* sf_malloc(size_t size) {
     if((ptr = getQuickBlock(requested_size)) != NULL){
         temp = (char*) ptr;
         temp += 8;
-        memset(temp, 0,(getBlockSize(ptr) - 16));
+        //memset(temp, 0,(getBlockSize(ptr) - 16));
 
         return temp;
     }
@@ -38,7 +38,7 @@ void* sf_malloc(size_t size) {
 
         temp = (char*) ptr;
         temp += 8;
-        memset(temp, 0,(getBlockSize(ptr) - 16));
+        //memset(temp, 0,(getBlockSize(ptr) - 16));
         return temp;
     }
 
@@ -56,13 +56,14 @@ void* sf_realloc(void *ptr, size_t size) {
     return NULL;
 }
 void sf_free(void *ptr) {
-    // initFreeBlock(ptr, getBlockSize(ptr));
-    // ptr = coaless(ptr)
-    // if(addToQuickList()){
-    //     return;
-    // }
-    // setNext(ptr, sf_free_list_head);
+    sf_block* temp = (sf_block*)ptr;
+    if(addToQuickList(temp)){
+        return;
+    }
+    //int check = coaless(temp);
+    coaless(temp);
+    setNext(temp, &sf_free_list_head);
 
-    // return;
+    return;
 }
 
