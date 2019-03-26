@@ -218,36 +218,41 @@ void clearBlock(sf_block* ptr){
 unsigned int coaless(sf_block* ptr){
     if(!getPrevAlloc(ptr)){
          sf_block* prevInMem = getPrevInMem(ptr);
-        if(setBlockSize(ptr, getBlockSize(ptr) + getBlockSize(prevInMem)) == 0){
+        if(setBlockSize(prevInMem, getBlockSize(ptr) + getBlockSize(prevInMem)) == 0){
             return 0;
         }
-        setPrevAlloc(ptr, 0);
+        //setPrevAlloc(ptr, 0);
 
 
-        setPrev(ptr, getPrev(prevInMem));
+        //setPrev(ptr, getPrev(prevInMem));
         //setNext(getPrev(prevInMem), ptr);
 
-        clearBlock(getPrevInMem(ptr));//can you have 2 free blocks next to eachother?
+        //clearBlock(getPrevInMem(ptr));//can you have 2 free blocks next to eachother?
 
-        setFooter(ptr, getBlockSize(ptr), getPrevAlloc(ptr), getAlloc(ptr));
+        setFooter(prevInMem, getBlockSize(ptr), getPrevAlloc(ptr), getAlloc(ptr));
+        ptr = prevInMem;
     }
     //ptr =
-    if(!getNextAlloc(ptr)){
-        if(setBlockSize(ptr, getBlockSize(ptr) + getBlockSize(getNextInMem(ptr))) == 0){
-            return 0;
-        }
-        setAlloc(ptr, 0);
+    // if(!getNextAlloc(ptr)){
+    //     if(setBlockSize(ptr, getBlockSize(ptr) + getBlockSize(getNextInMem(ptr))) == 0){
+    //         return 0;
+    //     }
+    //     setAlloc(ptr, 0);
 
-        sf_block* nextInMem = getNextInMem(ptr);
+    //     sf_block* nextInMem = getNextInMem(ptr);
 
-        //setPrev(getNext(nextInMem), ptr);
-        setNext(ptr, getNext(nextInMem));
+    //     //setPrev(getNext(nextInMem), ptr);
+    //     setNext(ptr, getNext(nextInMem));
 
-        clearBlock(getNextInMem(ptr));
+    //     clearBlock(getNextInMem(ptr));
 
-        setFooter(ptr, getBlockSize(ptr), getPrevAlloc(ptr), getAlloc(ptr));
+    //     setFooter(ptr, getBlockSize(ptr), getPrevAlloc(ptr), getAlloc(ptr));
 
-    }
+    // }
+    //setNext(ptr, getNext(&sf_free_list_head));
+    setNext(&sf_free_list_head, ptr);
+    setPrev(ptr, &sf_free_list_head);
+
     return 1;
 }
 
@@ -258,12 +263,12 @@ unsigned int addPage(){
         return 0;
     }
     //clear old epilogue
-    sf_block* ptr = (sf_block*)(temp + (PAGE_SZ - 8));
+    sf_block* ptr = (sf_block*)(temp-8);
+    //clearHeader();
     initEpilogue(ptr);
     ///test heavily
-    ptr = (sf_block*)(temp + (40));
-    setPrev(&sf_free_list_head, ptr);
-    initFreeBlock(ptr, &sf_free_list_head, getNext(&sf_free_list_head), (unsigned int)(PAGE_SZ - 48), getAlloc(getPrev(&sf_free_list_head)));//fix
+    //setPrev(&sf_free_list_head, ptr);
+    initFreeBlock(ptr, &sf_free_list_head, getNext(&sf_free_list_head), (unsigned int)(PAGE_SZ), getAlloc(getPrev(&sf_free_list_head)));//fix
     coaless(ptr);
     return 1;
 }

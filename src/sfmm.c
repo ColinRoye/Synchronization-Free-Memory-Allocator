@@ -34,7 +34,7 @@ void* sf_malloc(size_t size) {
 
         return temp;
     }
-    if((ptr = getFreeBlock(requested_size)) != NULL){
+    if((ptr = getFreeBlock(requested_size)) != &sf_free_list_head){
 
         temp = (char*) ptr;
         temp += 8;
