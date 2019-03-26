@@ -5,7 +5,7 @@
 
 int main(int argc, char const *argv[]) {
     sf_mem_init();
-    void *x = sf_malloc(3 * PAGE_SZ - sizeof(sf_prologue) - sizeof(sf_epilogue) - 32);
+    int *x = sf_malloc(sizeof(int));
 
     // int* ptr = sf_malloc(sizeof(int));
      sf_show_heap();

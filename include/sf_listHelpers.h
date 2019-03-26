@@ -12,7 +12,7 @@ sf_block *getPrev(sf_block* ptr);
 sf_block *getNextInMem(sf_block* ptr);
 sf_block *getPrevInMem(sf_block* ptr);
 void setPrevAlloc(sf_block* ptr, unsigned int prevAlloc);
-void setNextAlloc(sf_block* ptr, unsigned int nextAlloc);
+void setAlloc(sf_block* ptr, unsigned int nextAlloc);
 int setBlockSize(sf_block* ptr, unsigned int block_size);
 void setRequestedSize(sf_block* ptr, unsigned int requested_size);
 void setPrev(sf_block* ptr, sf_block* prev);
@@ -24,7 +24,7 @@ int setFreeHeader(sf_block* ptr, unsigned int block_size, unsigned int prevAlloc
 void clearHeader(sf_block* ptr);
 void initPrologue(sf_block* ptr);
 void initEpilogue(sf_block* ptr);
-void initFreeBlock(sf_block* ptr, sf_block* prev, sf_block* next, unsigned int block_size, unsigned prevAlloc, unsigned nextAlloc);
+void initFreeBlock(sf_block* ptr, sf_block* prev, sf_block* next, unsigned int block_size, unsigned prevAlloc);
 int initFirstBlock();
 void clearBlock(sf_block* ptr);
 unsigned int coaless(sf_block* ptr);

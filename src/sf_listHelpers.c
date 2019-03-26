@@ -41,8 +41,9 @@ sf_block *getPrev(sf_block* ptr){
 
 sf_block *getPrevInMem(sf_block* ptr){
     if(!getPrevAlloc(ptr)){
-        unsigned int prev_block_size = getBlockSize((sf_block *)(char*)ptr - 8);
-        return (sf_block *)((char*)ptr - prev_block_size);
+        char* temp = (char*)ptr;
+        unsigned int prev_block_size = getBlockSize((sf_block *)(temp - 8));
+        return (sf_block *)(temp - (prev_block_size));
     }
     return NULL;
 }
@@ -52,15 +53,17 @@ void setPrevAlloc(sf_block* ptr, unsigned int prevAlloc){
         debug("WARN: prevAlloc not set!");
         return;
     }
-    ptr->header.block_size = (unsigned)(ptr->header.block_size |(prevAlloc << 1));
+    ptr->header.block_size = (unsigned)(ptr->header.block_size & 0xFFFFFFFD);
+    ptr->header.block_size += (prevAlloc << 1);
 
 }
 void setAlloc(sf_block* ptr, unsigned int alloc){
     if(alloc > 1){
-        debug("WARN: nextAlloc not set!");
+        debug("WARN: alloc not set!");
         return;
     }
-    ptr->header.block_size = (unsigned)(ptr->header.block_size |(alloc));
+    ptr->header.block_size = (unsigned)(ptr->header.block_size & 0xFFFFFFFE);
+    ptr->header.block_size += alloc;
 }
 int setBlockSize(sf_block* ptr, unsigned int block_size){
     if(block_size % 16 != 0){
@@ -179,8 +182,8 @@ void initEpilogue(sf_block* ptr){
     setAllocHeader(ptr, 0, 0, 1, 0);
 }
 
-void initFreeBlock(sf_block* ptr, sf_block* prev, sf_block* next, unsigned int block_size, unsigned int prevAlloc, unsigned int alloc){
-
+void initFreeBlock(sf_block* ptr, sf_block* prev, sf_block* next, unsigned int block_size, unsigned int prevAlloc){
+    unsigned int alloc = 0;
     setFreeHeader(ptr, block_size, prevAlloc, alloc, prev, next);
 
 
@@ -205,7 +208,7 @@ int initFirstBlock(){
     initEpilogue(ptr);
 
     ptr = (sf_block*)(temp + (40));
-    initFreeBlock(ptr, &sf_free_list_head, &sf_free_list_head, PAGE_SZ-48, 1, 0);//check alloc bits
+    initFreeBlock(ptr, &sf_free_list_head, &sf_free_list_head, PAGE_SZ-48, 1);//check alloc bits
     // isMatch(ptr);
     return 0;
 }
@@ -214,13 +217,12 @@ void clearBlock(sf_block* ptr){
 }
 unsigned int coaless(sf_block* ptr){
     if(!getPrevAlloc(ptr)){
-
-        if(setBlockSize(ptr, getBlockSize(ptr) + getBlockSize(getPrevInMem(ptr))) == 0){
+         sf_block* prevInMem = getPrevInMem(ptr);
+        if(setBlockSize(ptr, getBlockSize(ptr) + getBlockSize(prevInMem)) == 0){
             return 0;
         }
         setPrevAlloc(ptr, 0);
 
-        sf_block* prevInMem = getPrevInMem(ptr);
 
         setPrev(ptr, getPrev(prevInMem));
         //setNext(getPrev(prevInMem), ptr);
@@ -261,7 +263,7 @@ unsigned int addPage(){
     ///test heavily
     ptr = (sf_block*)(temp + (40));
     setPrev(&sf_free_list_head, ptr);
-    initFreeBlock(ptr, &sf_free_list_head, getNext(&sf_free_list_head), (unsigned int)(PAGE_SZ - 48), 1, 1);//fix
+    initFreeBlock(ptr, &sf_free_list_head, getNext(&sf_free_list_head), (unsigned int)(PAGE_SZ - 48), getAlloc(getPrev(&sf_free_list_head)));//fix
     coaless(ptr);
     return 1;
 }
@@ -285,7 +287,7 @@ sf_block* splitBlock(sf_block* ptr, unsigned int block_size, unsigned int reques
     //set free block
     char* temp = (char*) ptr;
     sf_block* other_ptr = (sf_block *)(temp + getBlockSize(ptr));
-    initFreeBlock(other_ptr, prev, next, (unsigned int)((int)total_size - (int)block_size), (unsigned int)1, 0);//err
+    initFreeBlock(other_ptr, prev, next, (unsigned int)((int)total_size - (int)block_size), (unsigned int)1);//err
 
     setNext(&sf_free_list_head, other_ptr);
     return ptr;
@@ -310,11 +312,19 @@ void emptyQL(int i){
 }
 void setNextQL(sf_block* ptr, int i){
     if(sf_quick_lists[i].length < QUICK_LIST_MAX){
-        setNext(ptr, sf_quick_lists[i].first);
+        if(sf_quick_lists[i].first != NULL){
+            ptr->body.links.next = sf_quick_lists[i].first;
+            //memset(ptr->body.links.prev, 0, 8);
+
+        }else{
+            ptr->body.links.next = NULL;
+        }
     } else{
         emptyQL(i);
     }
+    //setRequestedSize(ptr,0);
     sf_quick_lists[i].first = ptr;
+    ptr->body.links.prev = 0;
 }
 int addToQuickList(sf_block* ptr){
     for(int i = 0; i < NUM_QUICK_LISTS; i++){

@@ -56,7 +56,8 @@ void* sf_realloc(void *ptr, size_t size) {
     return NULL;
 }
 void sf_free(void *ptr) {
-    sf_block* temp = (sf_block*)ptr;
+    char* chg = (char*)ptr;
+    sf_block* temp = (sf_block*)(chg-8);
     if(addToQuickList(temp)){
         return;
     }

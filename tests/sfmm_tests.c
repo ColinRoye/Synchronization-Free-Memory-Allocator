@@ -228,243 +228,243 @@ Test(sf_memsuite_student, realloc_smaller_block_free_block, .init = sf_mem_init,
 //############################################
 
 #include "sf_listHelpers.h"
-// #include "sfmm_testHelpers.h"
-// //GET PREV ALLOC
-// Test(sf_memsuite_student, getPrevAlloc_test, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	sf_block* block = initEmptyBlock();
-// 	unsigned int prevAlloc = 1;
-// 	setPrevAlloc(block, prevAlloc);
-// 	cr_assert(getPrevAlloc(block) == prevAlloc);
-// }
-// //GET NEXT ALLOC
-// Test(sf_memsuite_student, getNextAlloc_test, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	sf_block* block = initEmptyBlock();
-// 	unsigned int nextAlloc = 1;
-// 	setNextAlloc(block, nextAlloc);
-// 	cr_assert(getNextAlloc(block) == nextAlloc);
-// }
-// //GET BLOCK SIZE
-// Test(sf_memsuite_student, getBlockSize_test, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	sf_block* block = initEmptyBlock();
-// 	unsigned int block_size = 32;
-// 	setBlockSize(block, block_size);
-// 	cr_assert(getBlockSize(block) == block_size);
-// 	free(block);
-// }
-// //GET REQUESTED SIZE
-// Test(sf_memsuite_student, getRequestedSize_test, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	sf_block* block = initEmptyBlock();
-// 	unsigned int requested_size;
-// 	requested_size = 0x3FFFFFFF;
-// 	setRequestedSize(block, requested_size);
-// 	cr_assert_eq(getRequestedSize(block), requested_size);
+#include "sfmm_testHelpers.h"
+//GET PREV ALLOC
+Test(sf_memsuite_student, getPrevAlloc_test, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_block* block = initEmptyBlock();
+	unsigned int prevAlloc = 1;
+	setPrevAlloc(block, prevAlloc);
+	cr_assert(getPrevAlloc(block) == prevAlloc);
+}
+//GET NEXT ALLOC
+Test(sf_memsuite_student, getAlloc_test, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_block* block = initEmptyBlock();
+	unsigned int nextAlloc = 1;
+	setAlloc(block, nextAlloc);
+	cr_assert(getAlloc(block) == nextAlloc);
+}
+//GET BLOCK SIZE
+Test(sf_memsuite_student, getBlockSize_test, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_block* block = initEmptyBlock();
+	unsigned int block_size = 32;
+	setBlockSize(block, block_size);
+	cr_assert(getBlockSize(block) == block_size);
+	free(block);
+}
+//GET REQUESTED SIZE
+Test(sf_memsuite_student, getRequestedSize_test, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_block* block = initEmptyBlock();
+	unsigned int requested_size;
+	requested_size = 0x3FFFFFFF;
+	setRequestedSize(block, requested_size);
+	cr_assert_eq(getRequestedSize(block), requested_size);
 
 
-// 	requested_size = 0xFFFFFFFF;
-// 	setRequestedSize(block, requested_size);
-// 	cr_assert_eq(getRequestedSize(block), requested_size);
-// 	free(block);
+	requested_size = 0xFFFFFFFF;
+	setRequestedSize(block, requested_size);
+	cr_assert_eq(getRequestedSize(block), requested_size);
+	free(block);
 
-// }
-// //GET NEXT
-// Test(sf_memsuite_student, getnNext_test, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	sf_block* block = initEmptyBlock();
-// 	sf_block* dummy = initEmptyBlock();
-// 	setNext(block, dummy);
-// 	cr_assert_eq(dummy, getNext(block));
-// 	free(block);
-// 	free(dummy);
+}
+//GET NEXT
+Test(sf_memsuite_student, getnNext_test, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_block* block = initEmptyBlock();
+	sf_block* dummy = initEmptyBlock();
+	setNext(block, dummy);
+	cr_assert_eq(dummy, getNext(block));
+	free(block);
+	free(dummy);
 
-// }
-// //GET PREV
-// Test(sf_memsuite_student, getPrev_test, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	sf_block* block = initEmptyBlock();
-// 	sf_block* dummy = initEmptyBlock();
-// 	setPrev(block, dummy);
-// 	cr_assert_eq(dummy, getPrev(block));
-// 	free(block);
-// 	free(dummy);
-// }
-// //SET ALLOC HEADER
-// Test(sf_memsuite_student, setAllocHeader_test, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	sf_block* ptr = initEmptyBlock();
-// 	unsigned int block_size = 0xFFFFFFFC;
-// 	unsigned int requested_size = 0xFFFFFFFC;
-// 	unsigned int nextAlloc = 1;
-// 	unsigned int prevAlloc = 1;
-// 	int check;
-// 	check = setAllocHeader(ptr, block_size, prevAlloc, nextAlloc, requested_size);
-// 	cr_assert_eq(check, 0);
-
-
-// 	block_size = 32;
-// 	requested_size = 22;
-// 	nextAlloc = 0;
-// 	prevAlloc = 1;
-// 	setAllocHeader(ptr, block_size, prevAlloc, nextAlloc, requested_size);
-
-// 	cr_assert_eq(block_size, getBlockSize(ptr));
-// 	cr_assert_eq(requested_size, getRequestedSize(ptr));
-// 	cr_assert_eq(nextAlloc, getNextAlloc(ptr));
-// 	cr_assert_eq(prevAlloc, getPrevAlloc(ptr));
+}
+//GET PREV
+Test(sf_memsuite_student, getPrev_test, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_block* block = initEmptyBlock();
+	sf_block* dummy = initEmptyBlock();
+	setPrev(block, dummy);
+	cr_assert_eq(dummy, getPrev(block));
+	free(block);
+	free(dummy);
+}
+//SET ALLOC HEADER
+Test(sf_memsuite_student, setAllocHeader_test, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_block* ptr = initEmptyBlock();
+	unsigned int block_size = 0xFFFFFFFC;
+	unsigned int requested_size = 0xFFFFFFFC;
+	unsigned int nextAlloc = 1;
+	unsigned int prevAlloc = 1;
+	int check;
+	check = setAllocHeader(ptr, block_size, prevAlloc, nextAlloc, requested_size);
+	cr_assert_eq(check, 0);
 
 
+	block_size = 32;
+	requested_size = 22;
+	nextAlloc = 0;
+	prevAlloc = 1;
+	setAllocHeader(ptr, block_size, prevAlloc, nextAlloc, requested_size);
 
-// 	block_size = 48;
-// 	requested_size = 22;
-// 	nextAlloc = 0;
-// 	prevAlloc = 1;
-// 	setAllocHeader(ptr, block_size, prevAlloc, nextAlloc, requested_size);
-// 	cr_assert_eq(block_size, getBlockSize(ptr));
-// 	cr_assert_eq(requested_size, getRequestedSize(ptr));
-// 	cr_assert_eq(nextAlloc, getNextAlloc(ptr));
-// 	cr_assert_eq(prevAlloc, getPrevAlloc(ptr));
-
-
-// }
-// // SET FREE HEADER
-// Test(sf_memsuite_student, setFreeHeader_test, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	sf_block* ptr = initEmptyBlock();
-// 	unsigned int block_size = 0xFFFFFFFC;
-// 	unsigned int nextAlloc = 1;
-// 	unsigned int prevAlloc = 1;
-
-// 	int check;
-// 	check =setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, ptr, ptr);
-
-// 	cr_assert_eq(check, 0);
-
-
-// 	block_size = 32;
-// 	nextAlloc = 0;
-// 	prevAlloc = 1;
-// 	setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, ptr, ptr);
-
-// 	cr_assert_eq(block_size, getBlockSize(ptr));
-// 	cr_assert_eq(nextAlloc, getNextAlloc(ptr));
-// 	cr_assert_eq(prevAlloc, getPrevAlloc(ptr));
+	cr_assert_eq(block_size, getBlockSize(ptr));
+	cr_assert_eq(requested_size, getRequestedSize(ptr));
+	cr_assert_eq(nextAlloc, getAlloc(ptr));
+	cr_assert_eq(prevAlloc, getPrevAlloc(ptr));
 
 
 
-// 	block_size = 48;
-// 	nextAlloc = 0;
-// 	prevAlloc = 1;
-// 	setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, ptr, ptr);
-// 	cr_assert_eq(block_size, getBlockSize(ptr));
-// 	cr_assert_eq(nextAlloc, getNextAlloc(ptr));
-// 	cr_assert_eq(prevAlloc, getPrevAlloc(ptr));
+	block_size = 48;
+	requested_size = 22;
+	nextAlloc = 0;
+	prevAlloc = 1;
+	setAllocHeader(ptr, block_size, prevAlloc, nextAlloc, requested_size);
+	cr_assert_eq(block_size, getBlockSize(ptr));
+	cr_assert_eq(requested_size, getRequestedSize(ptr));
+	cr_assert_eq(nextAlloc, getAlloc(ptr));
+	cr_assert_eq(prevAlloc, getPrevAlloc(ptr));
 
 
-// }
-// //CLEAR BLOCK
-// Test(sf_memsuite_student, clearHeader_test, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	sf_block* ptr = initEmptyBlock();
-// 	unsigned int block_size = 0xFFFFFFFC;
-// 	unsigned int nextAlloc = 1;
-// 	unsigned int prevAlloc = 1;
+}
+// SET FREE HEADER
+Test(sf_memsuite_student, setFreeHeader_test, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_block* ptr = initEmptyBlock();
+	unsigned int block_size = 0xFFFFFFFC;
+	unsigned int nextAlloc = 1;
+	unsigned int prevAlloc = 1;
 
-// 	setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, ptr, ptr);
-// 	clearHeader(ptr);
+	int check;
+	check =setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, ptr, ptr);
 
-// 	cr_assert_eq(getBlockSize(ptr), 0);
-// 	cr_assert_eq(getPrevAlloc(ptr), 0);
-// 	cr_assert_eq(getNextAlloc(ptr), 0);
-
-// 	block_size = 32;
-// 	nextAlloc = 0;
-// 	prevAlloc = 1;
-// 	setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, ptr, ptr);
-// 	clearHeader(ptr);
-// 	cr_assert_eq(getBlockSize(ptr), 0);
-// 	cr_assert_eq(getPrevAlloc(ptr), 0);
-// 	cr_assert_eq(getNextAlloc(ptr), 0);
+	cr_assert_eq(check, 0);
 
 
+	block_size = 32;
+	nextAlloc = 0;
+	prevAlloc = 1;
+	setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, ptr, ptr);
 
-// 	// block_size = 48;
-// 	// nextAlloc = 0;
-// 	// prevAlloc = 1;
-// 	// setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, ptr, ptr);
-// 	// clearHeader(ptr);
-// 	// cr_assert_eq(block_size, 0);
-// 	// cr_assert_eq(nextAlloc, 0);
-// 	// cr_assert_eq(prevAlloc, 0);
-
-
-// }
-// //SET FOOTER
-// Test(sf_memsuite_student, setFooter_test, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	sf_block* ptr = sf_mem_grow();
-// 	sf_block* ftr_ptr;
-// 	char* temp = (char*)ptr;
-// 	unsigned int block_size = 0xFFFFFFFC;
-// 	unsigned int nextAlloc = 1;
-// 	unsigned int prevAlloc = 1;
-
-// 	ftr_ptr = (sf_block*)(temp+(block_size-8));
-
-// 	int check = setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, ptr, ptr);
-// 	check += setFooter(ptr, block_size, prevAlloc, nextAlloc);
-
-// 	cr_assert_eq(check, 0);
-
-
-// 	block_size = 32;
-// 	nextAlloc = 0;
-// 	prevAlloc = 1;
-
-// 	ftr_ptr = (sf_block*)(temp+(block_size-8));
-
-
-// 	setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, ptr, ptr);
-// 	setFooter(ptr, block_size, prevAlloc, nextAlloc);
-
-// 	cr_assert_eq(getBlockSize(ftr_ptr), getBlockSize(ptr));
-// 	cr_assert_eq(getNextAlloc(ftr_ptr), getNextAlloc(ptr));
-// 	cr_assert_eq(getPrevAlloc(ftr_ptr), getPrevAlloc(ptr));
+	cr_assert_eq(block_size, getBlockSize(ptr));
+	cr_assert_eq(nextAlloc, getAlloc(ptr));
+	cr_assert_eq(prevAlloc, getPrevAlloc(ptr));
 
 
 
-// 	block_size = 48;
-// 	nextAlloc = 0;
-// 	prevAlloc = 1;
-
-// 	ftr_ptr = (sf_block*)(temp+(block_size-8));
-
-
-// 	setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, ptr, ptr);
-// 	setFooter(ptr, block_size, prevAlloc, nextAlloc);
-
-// 	cr_assert_eq(getBlockSize(ftr_ptr), getBlockSize(ptr));
-// 	cr_assert_eq(getNextAlloc(ftr_ptr), getNextAlloc(ptr));
-// 	cr_assert_eq(getPrevAlloc(ftr_ptr), getPrevAlloc(ptr));
+	block_size = 48;
+	nextAlloc = 0;
+	prevAlloc = 1;
+	setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, ptr, ptr);
+	cr_assert_eq(block_size, getBlockSize(ptr));
+	cr_assert_eq(nextAlloc, getAlloc(ptr));
+	cr_assert_eq(prevAlloc, getPrevAlloc(ptr));
 
 
-// }
+}
+//CLEAR BLOCK
+Test(sf_memsuite_student, clearHeader_test, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_block* ptr = initEmptyBlock();
+	unsigned int block_size = 0xFFFFFFFC;
+	unsigned int nextAlloc = 1;
+	unsigned int prevAlloc = 1;
 
-// //INIT  EPILOGUE
-// Test(sf_memsuite_student, initEpilogue_test, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	sf_block* ptr = sf_mem_grow();
-// 	initEpilogue(ptr);
-// 	char* temp = (char*)ptr;
-// 	ptr = (sf_block*)(temp + (PAGE_SZ - 8));
-// 	cr_assert_eq(getNextAlloc(ptr), 1);
-// 	//cr_assert_eq(getPrevAlloc(ptr), 1);
-// 	cr_assert_eq(getBlockSize(ptr), 0);
+	setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, ptr, ptr);
+	clearHeader(ptr);
+
+	cr_assert_eq(getBlockSize(ptr), 0);
+	cr_assert_eq(getPrevAlloc(ptr), 0);
+	cr_assert_eq(getAlloc(ptr), 0);
+
+	block_size = 32;
+	nextAlloc = 0;
+	prevAlloc = 1;
+	setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, ptr, ptr);
+	clearHeader(ptr);
+	cr_assert_eq(getBlockSize(ptr), 0);
+	cr_assert_eq(getPrevAlloc(ptr), 0);
+	cr_assert_eq(getAlloc(ptr), 0);
 
 
 
-// }
-// //INIT PROLOGUE
-// Test(sf_memsuite_student, initPrologue_test, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	sf_block* ptr = sf_mem_grow();
-// 	initPrologue(ptr);
-// 	char* temp = (char*)ptr;
-// 	ptr = (sf_block*)(temp + 8);
-// 	cr_assert_eq(getNextAlloc(ptr), 1);
-// 	cr_assert_eq(getPrevAlloc(ptr), 0);
-// 	cr_assert_eq(getBlockSize(ptr), 32);
-// }
+	// block_size = 48;
+	// nextAlloc = 0;
+	// prevAlloc = 1;
+	// setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, ptr, ptr);
+	// clearHeader(ptr);
+	// cr_assert_eq(block_size, 0);
+	// cr_assert_eq(nextAlloc, 0);
+	// cr_assert_eq(prevAlloc, 0);
+
+
+}
+//SET FOOTER
+Test(sf_memsuite_student, setFooter_test, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_block* ptr = sf_mem_grow();
+	sf_block* ftr_ptr;
+	char* temp = (char*)ptr;
+	unsigned int block_size = 0xFFFFFFFC;
+	unsigned int nextAlloc = 1;
+	unsigned int prevAlloc = 1;
+
+	ftr_ptr = (sf_block*)(temp+(block_size-8));
+
+	int check = setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, ptr, ptr);
+	check += setFooter(ptr, block_size, prevAlloc, nextAlloc);
+
+	cr_assert_eq(check, 0);
+
+
+	block_size = 32;
+	nextAlloc = 0;
+	prevAlloc = 1;
+
+	ftr_ptr = (sf_block*)(temp+(block_size-8));
+
+
+	setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, ptr, ptr);
+	setFooter(ptr, block_size, prevAlloc, nextAlloc);
+
+	cr_assert_eq(getBlockSize(ftr_ptr), getBlockSize(ptr));
+	cr_assert_eq(getAlloc(ftr_ptr), getAlloc(ptr));
+	cr_assert_eq(getPrevAlloc(ftr_ptr), getPrevAlloc(ptr));
+
+
+
+	block_size = 48;
+	nextAlloc = 0;
+	prevAlloc = 1;
+
+	ftr_ptr = (sf_block*)(temp+(block_size-8));
+
+
+	setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, ptr, ptr);
+	setFooter(ptr, block_size, prevAlloc, nextAlloc);
+
+	cr_assert_eq(getBlockSize(ftr_ptr), getBlockSize(ptr));
+	cr_assert_eq(getAlloc(ftr_ptr), getAlloc(ptr));
+	cr_assert_eq(getPrevAlloc(ftr_ptr), getPrevAlloc(ptr));
+
+
+}
+
+//INIT  EPILOGUE
+Test(sf_memsuite_student, initEpilogue_test, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_block* ptr = sf_mem_grow();
+	initEpilogue(ptr);
+	char* temp = (char*)ptr;
+	ptr = (sf_block*)(temp + (PAGE_SZ - 8));
+	cr_assert_eq(getAlloc(ptr), 1);
+	//cr_assert_eq(getPrevAlloc(ptr), 1);
+	cr_assert_eq(getBlockSize(ptr), 0);
+
+
+
+}
+//INIT PROLOGUE
+Test(sf_memsuite_student, initPrologue_test, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_block* ptr = sf_mem_grow();
+	initPrologue(ptr);
+	char* temp = (char*)ptr;
+	ptr = (sf_block*)(temp + 8);
+	cr_assert_eq(getAlloc(ptr), 1);
+	cr_assert_eq(getPrevAlloc(ptr), 0);
+	cr_assert_eq(getBlockSize(ptr), 32);
+}
 
 
 
