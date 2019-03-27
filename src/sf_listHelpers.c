@@ -195,9 +195,13 @@ void initFreeBlock(sf_block* ptr, unsigned int block_size, unsigned int prevAllo
 }
 void FL_add(sf_block* ptr){
     setNext(ptr, getNext(&sf_free_list_head));
+    setPrev(getPrev(&sf_free_list_head), ptr);
+
 }
 void FL_remove(sf_block* ptr){
     setNext(getPrev(ptr), getNext(ptr));
+    setPrev(getNext(ptr), getPrev(ptr));
+
 }
 int initFirstBlock(){
     char* temp = (char*)sf_mem_grow();
@@ -207,6 +211,8 @@ int initFirstBlock(){
     }
     sf_block* ptr = (sf_block*)temp;
 
+    setNext(&sf_free_list_head, &sf_free_list_head);
+    setPrev(&sf_free_list_head, &sf_free_list_head);
 
 
     initPrologue(ptr);
@@ -215,7 +221,7 @@ int initFirstBlock(){
     ptr = (sf_block*)(temp + (40));
     initFreeBlock(ptr, PAGE_SZ-48, 1);//check alloc bits
 
-    FL_add(ptr);
+    //FL_add(ptr);
     return 0;
 }
 void clearBlock(sf_block* ptr){
@@ -225,7 +231,7 @@ void clearBlock(sf_block* ptr){
 
 
 
-sf_block* mergeBlock(sf_block* b1, sf_block* b2){
+sf_block* mergeBlocks(sf_block* b1, sf_block* b2){
     if(b1 > b2){
         sf_block* temp = b1;
         b1 = b2;
@@ -248,7 +254,7 @@ int nextIsFree(sf_block* ptr){
 }
 
 unsigned int coaless(sf_block* ptr){
-    FL_add(ptr);
+   // FL_add(ptr);
     if(prevIsFree(ptr)){
         ptr = mergeBlocks(ptr, getPrevInMem(ptr));
     }
@@ -305,6 +311,7 @@ sf_block* splitBlock(sf_block* ptr, unsigned int block_size, unsigned int reques
     setPrevAlloc(other_ptr, 1);
     setNext(other_ptr, next);
     setPrev(other_ptr, prev);
+    setFooter(other_ptr, getBlockSize(other_ptr), 1, 0);
 
     return ptr;
 

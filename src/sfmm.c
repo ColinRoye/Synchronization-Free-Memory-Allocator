@@ -18,8 +18,10 @@ void* sf_malloc(size_t size) {
         return NULL;
     }
     if(sf_free_list_head.body.links.next == NULL){//fix
+
         initQuickLists();
         initFirstBlock();
+
     }
     if(block_size == -1){
         // return exit failure or NULL?
@@ -38,15 +40,14 @@ void* sf_malloc(size_t size) {
 
         temp = (char*) ptr;
         temp += 8;
+        FL_remove(ptr);
         //memset(temp, 0,(getBlockSize(ptr) - 16));
         return temp;
     }
-    sf_show_heap();
 
     if(addPage() == 0){
         //return exit failure out of mem?
     }
-    sf_show_heap();
     // if(sf_errno == NOMEM{sear}){
     //     //return exit failure or NULL?
     // }
