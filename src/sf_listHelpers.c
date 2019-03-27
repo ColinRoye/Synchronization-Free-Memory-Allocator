@@ -224,6 +224,7 @@ void clearBlock(sf_block* ptr){
 
 
 
+
 sf_block* mergeBlock(sf_block* b1, sf_block* b2){
     if(b1 > b2){
         sf_block* temp = b1;
@@ -254,6 +255,7 @@ unsigned int coaless(sf_block* ptr){
     if(nextIsFree(ptr)){
         ptr = mergeBlocks(ptr, getNextInMem(ptr));
     }
+
     return 1;
 }
 unsigned int addPage(){
@@ -271,6 +273,7 @@ unsigned int addPage(){
     // prevAlloc of last epilogue
     unsigned int prevAlloc = getPrevAlloc(ptr);
     initFreeBlock(ptr, (unsigned int)(PAGE_SZ), prevAlloc);
+
 
     coaless(ptr);
 
