@@ -35,4 +35,5 @@ int getListBlockSize(int i);
 void emptyQL(int i);
 void setNextQL(sf_block* ptr, int i);
 int addToQuickList(sf_block* ptr);
+void setNextInMemPA(sf_block* ptr, unsigned int prevAlloc);
 #endif
