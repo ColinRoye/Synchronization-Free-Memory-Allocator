@@ -7,17 +7,11 @@ int main(int argc, char const *argv[]) {
     sf_mem_init();
 
     sf_errno = 0;
-    /* void *w = */ sf_malloc(8);
-    sf_show_heap();
-    void *x = sf_malloc(200);
-    sf_show_heap();
-    void *y = sf_malloc(300);
-    sf_show_heap();
-    /* void *z = */ sf_malloc(4);
-    sf_show_heap();
+    /* void *x = */ sf_malloc(8);
+    void *y = sf_malloc(32);
+    /* void *z = */ sf_malloc(1);
+
     sf_free(y);
-    sf_show_heap();
-    sf_free(x);
     sf_show_heap();
 
 

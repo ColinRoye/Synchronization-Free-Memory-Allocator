@@ -10,9 +10,13 @@
 
 
 int actualSize(unsigned int size){
+    unsigned int requested_size = size;
     size = size + (16-size%16);
     if(size < 32){
         size = 32;
+    }
+    if((size-requested_size) < 8){
+        return (size + 16);
     }
     return size;
 }
