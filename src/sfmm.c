@@ -36,17 +36,21 @@ void* sf_malloc(size_t size) {
 
         return temp;
     }
+
     if((ptr = getFreeBlock(requested_size)) != &sf_free_list_head){
+
+        FL_remove(ptr);
 
         temp = (char*) ptr;
         temp += 8;
-        FL_remove(ptr);
         //memset(temp, 0,(getBlockSize(ptr) - 16));
         return temp;
     }
 
     if(addPage() == 0){
         //return exit failure out of mem?
+        sf_errno = ENOMEM;
+        return NULL;
     }
     // if(sf_errno == NOMEM{sear}){
     //     //return exit failure or NULL?
@@ -64,6 +68,7 @@ void sf_free(void *ptr) {
     if(addToQuickList(temp)){
         return;
     }
+   //setAlloc(temp,0);
     //int check = coaless(temp);
     coaless(temp);
     // setNext(temp, &sf_free_list_head);

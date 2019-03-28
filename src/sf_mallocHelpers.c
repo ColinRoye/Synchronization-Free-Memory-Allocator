@@ -5,6 +5,7 @@
 #include "debug.h"
 #include "sf_listHelpers.h"
 
+
 #include "sfmm.h"
 
 
@@ -34,6 +35,8 @@ sf_block* getFreeBlock(unsigned int requested_size){
     }
 
     if(current!=&sf_free_list_head){
+        setAlloc(current, 1);
+       // FL_remove(current);
         setNextInMemPA(current, 1);
     }
     return current;

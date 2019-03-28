@@ -194,8 +194,13 @@ void initFreeBlock(sf_block* ptr, unsigned int block_size, unsigned int prevAllo
 
 }
 void FL_add(sf_block* ptr){
-    setNext(ptr, getNext(&sf_free_list_head));
-    setPrev(getPrev(&sf_free_list_head), ptr);
+
+    setPrev(getNext(&sf_free_list_head), ptr);
+    setNext(&sf_free_list_head, ptr);
+    setAlloc(ptr, 0);
+    setPrevAlloc(getNextInMem(ptr), 0);
+    setFooter(ptr, getBlockSize(ptr), getPrevAlloc(ptr), getAlloc(ptr));
+    setRequestedSize(ptr, 0);
 
 }
 void FL_remove(sf_block* ptr){
@@ -237,13 +242,18 @@ sf_block* mergeBlocks(sf_block* b1, sf_block* b2){
         b1 = b2;
         b2 = temp;
     }
+
     FL_remove(b1);
     FL_remove(b2);
-    FL_add(b1);
+    // setAlloc(ptr, alloc);
 
-    unsigned int block_size = getBlockSize(b1) + getBlockSize(b2);
-    unsigned int prevAlloc = 1; //should  equal one, no adjacent free blocks should remain free
-    initFreeBlock(b1, block_size, prevAlloc);
+
+    setBlockSize(b1, getBlockSize(b1) + getBlockSize(b2));
+    setAlloc(b1, 0);
+    setPrevAlloc(b1, 1);
+
+    setFooter(b1, getBlockSize(b1), getPrevAlloc(b1), 0);
+    //initFreeBlock(b1, block_size, prevAlloc);
     return b1;
 }
 int prevIsFree(sf_block* ptr){
@@ -254,15 +264,19 @@ int nextIsFree(sf_block* ptr){
 }
 
 unsigned int coaless(sf_block* ptr){
-   // FL_add(ptr);
+
+    FL_add(ptr);
+
     if(prevIsFree(ptr)){
         ptr = mergeBlocks(ptr, getPrevInMem(ptr));
-    }
-    if(nextIsFree(ptr)){
-        ptr = mergeBlocks(ptr, getNextInMem(ptr));
+        FL_add(ptr);
     }
 
-    return 1;
+    if(nextIsFree(ptr)){
+        ptr = mergeBlocks(ptr, getNextInMem(ptr));
+        FL_add(ptr);
+    }
+        return 1;
 }
 unsigned int addPage(){
     char* temp = (char*)sf_mem_grow();
@@ -292,8 +306,7 @@ sf_block* splitBlock(sf_block* ptr, unsigned int block_size, unsigned int reques
         return NULL;//deal with
     }
     //get variables for free block
-    sf_block* prev = getPrev(ptr);
-    sf_block* next = getNext(ptr);
+
 
     //unsigned int nextAlloc = (ptr);
 
@@ -302,16 +315,19 @@ sf_block* splitBlock(sf_block* ptr, unsigned int block_size, unsigned int reques
     setBlockSize(ptr, block_size);
     setAlloc(ptr, (unsigned int)1);
 
-
+    //FL_remove(ptr);
     sf_block* other_ptr = getNextInMem(ptr);
 
     setRequestedSize(other_ptr, 0);
     setBlockSize(other_ptr, (int)total_size - (int)block_size);
     setAlloc(other_ptr, 0);
     setPrevAlloc(other_ptr, 1);
-    setNext(other_ptr, next);
-    setPrev(other_ptr, prev);
+
     setFooter(other_ptr, getBlockSize(other_ptr), 1, 0);
+//    sf_show_heap();
+
+    FL_add(other_ptr);
+    // sf_show_heap();
 
     return ptr;
 
