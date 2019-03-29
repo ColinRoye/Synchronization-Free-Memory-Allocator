@@ -6,9 +6,8 @@
 int main(int argc, char const *argv[]) {
     sf_mem_init();
 
-    void *x = sf_malloc(sizeof(int));
-    /* void *y = */ sf_malloc(10);
-    x = sf_realloc(x, sizeof(int) * 10);
+    void *x = sf_malloc(sizeof(double) * 8);
+    sf_realloc(x, sizeof(int));
 
     // cr_assert_not_null(x, "x is NULL!");
     // sf_header *hp = (sf_header *)((char *)x - sizeof(sf_header));

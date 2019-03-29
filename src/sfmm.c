@@ -85,23 +85,24 @@ void* sf_realloc(void *ptr, size_t size) {
         sf_free(ptr);
         return NULL;
     }
-    if(getBlockSize(ptr) == block_size){
+    if(getBlockSize(blk) == block_size){
         return ptr;
     }
-    if(getBlockSize(ptr) > block_size){
+    if(getBlockSize(blk) < block_size){
         //malloc
         sf_show_heap();
-         sf_malloc(requested_size);
+        sf_block* frick = sf_malloc(requested_size);
         //memcp
         //memcpy(x, blk, requested_size);
         //free ptr
-         sf_show_heap();
+        sf_show_heap();
         sf_free(ptr);
 
-        return ptr;
+        return frick;
 
     }
-    if(getBlockSize(ptr) < block_size){
+    if(getBlockSize(blk) > block_size){
+        sf_show_heap();
         splitBlock(ptr, block_size, requested_size, total_size);
     }
     return ptr;
