@@ -103,7 +103,8 @@ void* sf_realloc(void *ptr, size_t size) {
     }
     if(getBlockSize(blk) > block_size){
         sf_show_heap();
-        splitBlock(ptr, block_size, requested_size, total_size);
+        printf("\n\n\n %u \n\n\n", requested_size);
+        splitBlock(blk, block_size, requested_size, total_size);
     }
     return ptr;
 }

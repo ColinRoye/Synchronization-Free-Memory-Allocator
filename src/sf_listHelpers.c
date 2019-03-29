@@ -298,6 +298,8 @@ unsigned int addPage(){
 sf_block* splitBlock(sf_block* ptr, unsigned int block_size, unsigned int requested_size, unsigned int total_size){
     unsigned int other_block_size = getBlockSize(ptr) - block_size;
     //check for splunsigned inters
+    setRequestedSize(ptr, requested_size);
+
     if(other_block_size < 32){
         return NULL;//deal with
     }
@@ -322,9 +324,9 @@ sf_block* splitBlock(sf_block* ptr, unsigned int block_size, unsigned int reques
     setFooter(other_ptr, getBlockSize(other_ptr), 1, 0);
 //    sf_show_heap();
 
-    FL_add(other_ptr);
+    //FL_add(other_ptr);
+    coaless(other_ptr);
     // sf_show_heap();
-
     return ptr;
 
 }
