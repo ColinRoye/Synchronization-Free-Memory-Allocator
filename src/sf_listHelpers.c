@@ -128,11 +128,7 @@ int setFreeHeader(sf_block* ptr, unsigned int block_size, unsigned int prevAlloc
     setPrev(ptr, prev);
     return 1;
 }
-void printBlockSize(void* ptr){
-    char* temp = (char*)ptr;
-    ptr = (sf_block*)(temp - 8);
-    printf("BLOCKSIZE: %d\n", getBlockSize(ptr));
-}
+
 void clearHeader(sf_block* ptr){
     setRequestedSize(ptr, (unsigned int)0);
     setBlockSize(ptr, (unsigned int)0);
@@ -350,7 +346,7 @@ void emptyQL(int i){
     }
 }
 void setNextQL(sf_block* ptr, int i){
-    if(sf_quick_lists[i].length < QUICK_LIST_MAX){
+    if(sf_quick_lists[i].length < QUICK_LIST_MAX-1){//check
         if(sf_quick_lists[i].first != NULL){
             ptr->body.links.next = sf_quick_lists[i].first;
             //memset(ptr->body.links.prev, 0, 8);
@@ -362,8 +358,10 @@ void setNextQL(sf_block* ptr, int i){
         emptyQL(i);
     }
     //setRequestedSize(ptr,0);
+    sf_quick_lists[i].length += 1;
     sf_quick_lists[i].first = ptr;
     ptr->body.links.prev = 0;
+
 }
 int addToQuickList(sf_block* ptr){
     for(int i = 0; i < NUM_QUICK_LISTS; i++){

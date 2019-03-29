@@ -45,8 +45,30 @@ sf_block* getFreeBlock(unsigned int requested_size){
     }
     return current;
 }
-sf_block* getQuickBlock(unsigned int size){
+int isQuick(unsigned int block_size){
+    unsigned int num = block_size - 32;
+    num = num / 16;
+    if(num < (NUM_QUICK_LISTS)){
+        return num;
+    }
+    return -1;
+}
+sf_block* getQuickBlock(unsigned int requested_size){
+    unsigned int block_size = actualSize(requested_size);
+    int i;
+    if((i = isQuick(block_size)) != -1){
+        if(sf_quick_lists[i].length > 0){
+            sf_quick_lists[i].length -= 1;
+            sf_block* ptr = sf_quick_lists[i].first;
+            setRequestedSize(ptr, requested_size);
+            if(sf_quick_lists[i].length == 0){
+                sf_quick_lists[i].first = NULL;
 
-    ///do this
+            }else{
+                sf_quick_lists[i].first = getNext(sf_quick_lists[i].first);
+            }
+            return ptr;
+        }
+    }
     return NULL;
 }

@@ -30,7 +30,6 @@ void clearBlock(sf_block* ptr);
 unsigned int coaless(sf_block* ptr);
 unsigned int addPage();
 void initQuickLists();
-void printBlockSize(void* ptr);
 int getListBlockSize(int i);
 void emptyQL(int i);
 void setNextQL(sf_block* ptr, int i);

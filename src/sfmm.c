@@ -59,9 +59,7 @@ void* sf_malloc(size_t size) {
    // return NULL;
 }
 
-void* sf_realloc(void *ptr, size_t size) {
-    return NULL;
-}
+
 void sf_free(void *ptr) {
     char* chg = (char*)ptr;
     sf_block* temp = (sf_block*)(chg-8);
@@ -76,3 +74,30 @@ void sf_free(void *ptr) {
     return;
 }
 
+void* sf_realloc(void *ptr, size_t size) {
+    char* temp = (char*)ptr;
+    temp = (temp - 8);
+    sf_block* blk = (sf_block*)temp;
+    unsigned int requested_size = size;
+    unsigned int block_size = actualSize(size);
+    unsigned int total_size = getBlockSize(blk);
+    if(size == 0){
+        sf_free(ptr);
+        return NULL;
+    }
+    if(getBlockSize(ptr) == block_size){
+        return ptr;
+    }
+    if(getBlockSize(ptr) > block_size){
+        //malloc
+        void* x = sf_malloc(block_size);
+        //memcp
+        memcpy(x, blk, requested_size);
+        //free ptr
+        sf_free(blk);
+    }
+    if(getBlockSize(ptr) < block_size){
+        splitBlock(ptr, block_size, requested_size, total_size);
+    }
+    return ptr;
+}
