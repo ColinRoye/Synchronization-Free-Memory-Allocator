@@ -2,6 +2,9 @@
 #ifndef SF_LF_H
 #define SF_LF_H
 #include "sfmm.h"
+sf_block* getFooter(sf_block* ptr);
+sf_block* getEpilogue();
+sf_block* getPrologue();
 unsigned int getNextAlloc(sf_block* ptr);
 unsigned int getAlloc(sf_block* ptr);
 unsigned int getPrevAlloc(sf_block* ptr);

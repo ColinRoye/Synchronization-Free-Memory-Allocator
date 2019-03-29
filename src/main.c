@@ -3,18 +3,27 @@
 #include "sfmm.h"
 #include "sf_listHelpers.h"
 
+
+
+
 int main(int argc, char const *argv[]) {
     sf_mem_init();
 
-    void *x = sf_malloc(sizeof(double) * 8);
-    sf_realloc(x, sizeof(int));
+    void* a = sf_malloc(8);
+    void* b = sf_malloc(8);
+    void* c = sf_malloc(8);
+    void* d = sf_malloc(8);
+    void* e = sf_malloc(8);
+    void* f = sf_malloc(8);
 
-    // cr_assert_not_null(x, "x is NULL!");
-    // sf_header *hp = (sf_header *)((char *)x - sizeof(sf_header));
-    // cr_assert(hp->block_size & THIS_BLOCK_ALLOCATED, "Allocated bit is not set!");
-    // cr_assert((hp->block_size & BLOCK_SIZE_MASK) == 48, "Realloc'ed block size not what was expected!");
-    sf_show_heap();
+    sf_free(a);
+    sf_free(b);
+    sf_free(c);
+    sf_free(d);
+    sf_free(e);
 
+
+    sf_free(f);
     sf_mem_fini();
 
     return EXIT_SUCCESS;

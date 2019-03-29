@@ -75,6 +75,9 @@ void sf_free(void *ptr) {
 }
 
 void* sf_realloc(void *ptr, size_t size) {
+    if(!isValidMemory(ptr)){
+        return
+    }
     char* temp = (char*)ptr;
     temp = (temp-8);
     sf_block* blk = (sf_block*)temp;
@@ -90,20 +93,18 @@ void* sf_realloc(void *ptr, size_t size) {
     }
     if(getBlockSize(blk) < block_size){
         //malloc
-        sf_show_heap();
         sf_block* frick = sf_malloc(requested_size);
         //memcp
-        //memcpy(x, blk, requested_size);
+        char* x = (char*)frick;
+        x+=8;
+        //memcpy(ptr, x, requested_size);
         //free ptr
-        sf_show_heap();
         sf_free(ptr);
 
         return frick;
 
     }
     if(getBlockSize(blk) > block_size){
-        sf_show_heap();
-        printf("\n\n\n %u \n\n\n", requested_size);
         splitBlock(blk, block_size, requested_size, total_size);
     }
     return ptr;

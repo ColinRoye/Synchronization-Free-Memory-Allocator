@@ -7,6 +7,14 @@
 
 
 
+sf_block* getEpilogue(){
+    char* temp = sf_mem_end();
+    return (sf_block*) (temp-8);
+}
+sf_block* getPrologue(){
+    char* temp = sf_mem_start();
+    return (sf_block*) (temp+8);
+}
 unsigned int getBlockSize(sf_block* ptr){
     return (unsigned int)ptr->header.block_size & 0xFFFFFFFC;
 }
@@ -322,7 +330,6 @@ sf_block* splitBlock(sf_block* ptr, unsigned int block_size, unsigned int reques
     setPrevAlloc(other_ptr, 1);
 
     setFooter(other_ptr, getBlockSize(other_ptr), 1, 0);
-//    sf_show_heap();
 
     //FL_add(other_ptr);
     coaless(other_ptr);
@@ -340,15 +347,28 @@ void initQuickLists(){
 int getListBlockSize(int i){
     return (32+(i*16));
 }
+void* getPayload(sf_block* ptr){
+    char* temp = (char*)ptr;
+    temp+=8;
+    return (sf_block*)temp;
+}
 void emptyQL(int i){
+   // printf("\n\n\n\n\n\n%d\n", QUICK_LIST_MAX);
+    sf_show_heap();
     sf_block* current = sf_quick_lists[i].first;
-    for(int j = 0; j < QUICK_LIST_MAX; i++){
-        setNext(&sf_free_list_head, current);
-        current = getNext(current);
+    sf_block* next;
+    for(int j = 0; j < QUICK_LIST_MAX; j++){
+        next = getNext(current);
+        setAlloc(current, 0);
+        coaless((current));
+        current = next;
+    sf_show_heap();
+
     }
+    sf_quick_lists[i].length = 0;
 }
 void setNextQL(sf_block* ptr, int i){
-    if(sf_quick_lists[i].length < QUICK_LIST_MAX-1){//check
+    if(sf_quick_lists[i].length < QUICK_LIST_MAX){//check
         if(sf_quick_lists[i].first != NULL){
             ptr->body.links.next = sf_quick_lists[i].first;
             //memset(ptr->body.links.prev, 0, 8);
@@ -358,6 +378,7 @@ void setNextQL(sf_block* ptr, int i){
         }
     } else{
         emptyQL(i);
+        ptr->body.links.next = 0;
     }
     //setRequestedSize(ptr,0);
     sf_quick_lists[i].length += 1;

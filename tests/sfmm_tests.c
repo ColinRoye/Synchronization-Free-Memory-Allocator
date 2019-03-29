@@ -14,6 +14,41 @@
 
 #define MIN_BLOCK_SIZE (32)
 
+
+
+
+
+void assert_no_mismatch() {
+	sf_block* ptr = getPrologue();
+	sf_block* ftr = getFooter(ptr);
+
+	sf_block* end = getEpilogue();
+	while(ptr < end){
+		if(getAlloc(ptr) == 0){
+			cr_assert_eq(getBlockSize(ptr),getBlockSize(ftr),"BLOCKSIZE MISMATCH");
+			cr_assert_eq(getAlloc(ptr),getAlloc(ftr),"ALLOC MISMATCH");
+			cr_assert_eq(getPrevAlloc(ptr),getPrevAlloc(ftr),"PREVALLOC MISTAMATCH");
+			cr_assert_eq(getRequestedSize(ptr),0,"REQUEST SIZE HEADER NOT ZERO");
+			cr_assert_eq(getRequestedSize(ftr),0,"REQUEST SIZE FOOTER NOT ZERO & NOT EQUAL");
+		}
+		ptr = getNextInMem(ptr);
+		ftr = getFooter(ptr);
+	}
+
+}
+void assert_no_splinter() {
+	sf_block* ptr = getPrologue();
+	sf_block* end = getEpilogue();
+
+	while(ptr < end){
+		cr_assert_eq((getBlockSize(ptr) >= 32),1, "ERR: SPLINTER FOUND");
+		cr_assert_eq((getBlockSize(ptr)%16),0, "BLOCK SIZE NOT FACTOR OF 16");
+		ptr = getNextInMem(ptr);
+	}
+	sf_show_heap();
+}
+//void assert_no_splinter(size_t size, int count, intNumBlocks) {
+
 /*
  * Assert the total number of free blocks of a specified size,
  * including quick lists.  If size == 0, then assert the total number
@@ -33,7 +68,12 @@ void assert_free_block_count(size_t size, int count) {
 	   cnt += sf_quick_lists[n].length;
     }
     cr_assert_eq(cnt, count, "Wrong number of free blocks (exp=%d, found=%d)", count, cnt);
+    assert_no_splinter();
+    assert_no_mismatch();
 }
+
+
+
 
 /*
  * Assert the total number of blocks in a single quick list (if size > 0),
@@ -54,18 +94,36 @@ void assert_quick_list_block_count(size_t size, int count) {
 	cr_assert_eq(cnt, count, "Wrong number of blocks in quick lists (exp=%d, found=%d)",
 		     count, cnt);
     }
+    assert_no_splinter();
+    assert_no_mismatch();
 }
 
+Test(sf_memsuite_student, empty_ql, .init = sf_mem_init, .fini = sf_mem_fini) {
 
-
-
-
-
+	void* b1 = sf_malloc(8);
+	void* b2 = sf_malloc(8);
+	void* b3 = sf_malloc(8);
+	void* b4 = sf_malloc(8);
+	void* b5 = sf_malloc(8);
+	void* b6 = sf_malloc(8);
+	sf_free(b1);
+	sf_free(b2);
+	sf_free(b3);
+	sf_free(b4);
+	sf_free(b5);
+	assert_quick_list_block_count(0, 5);
+	sf_free(b6);
+	assert_free_block_count(0, 3);
+	assert_quick_list_block_count(0, 1);
+	assert_no_splinter();
+	assert_no_mismatch();
+}
 
 
 Test(sf_memsuite_student, malloc_an_Integer_check_freelist, .init = sf_mem_init, .fini = sf_mem_fini) {
 	sf_errno = 0;
 	int *x = sf_malloc(sizeof(int));
+
 
 	cr_assert_not_null(x, "x is NULL!");
 
@@ -75,10 +133,13 @@ Test(sf_memsuite_student, malloc_an_Integer_check_freelist, .init = sf_mem_init,
 	assert_free_block_count(0, 1);
 	assert_free_block_count(4016, 1);
 	assert_quick_list_block_count(0, 0);
-
 	cr_assert(sf_errno == 0, "sf_errno is not zero!");
 	cr_assert(sf_mem_start() + PAGE_SZ == sf_mem_end(), "Allocated more than necessary!");
+	assert_no_splinter();
+    assert_no_mismatch();
 }
+
+
 
 Test(sf_memsuite_student, malloc_three_pages, .init = sf_mem_init, .fini = sf_mem_fini) {
 	sf_errno = 0;
@@ -88,6 +149,8 @@ Test(sf_memsuite_student, malloc_three_pages, .init = sf_mem_init, .fini = sf_me
 	assert_free_block_count(0, 0);
 	assert_quick_list_block_count(0, 0);
 	cr_assert(sf_errno == 0, "sf_errno is not 0!");
+	assert_no_splinter();
+    assert_no_mismatch();
 }
 
 Test(sf_memsuite_student, malloc_over_four_pages, .init = sf_mem_init, .fini = sf_mem_fini) {
@@ -99,6 +162,8 @@ Test(sf_memsuite_student, malloc_over_four_pages, .init = sf_mem_init, .fini = s
 	assert_free_block_count(16336, 1);
 	assert_quick_list_block_count(0, 0);
 	cr_assert(sf_errno == ENOMEM, "sf_errno is not ENOMEM!");
+	assert_no_splinter();
+    assert_no_mismatch();
 }
 
 Test(sf_memsuite_student, free_quick, .init = sf_mem_init, .fini = sf_mem_fini) {
@@ -113,6 +178,8 @@ Test(sf_memsuite_student, free_quick, .init = sf_mem_init, .fini = sf_mem_fini) 
 	assert_free_block_count(3936, 1);
 	assert_quick_list_block_count(48, 1);
 	cr_assert(sf_errno == 0, "sf_errno is not zero!");
+	assert_no_splinter();
+    assert_no_mismatch();
 }
 
 Test(sf_memsuite_student, free_no_coalesce, .init = sf_mem_init, .fini = sf_mem_fini) {
@@ -128,6 +195,8 @@ Test(sf_memsuite_student, free_no_coalesce, .init = sf_mem_init, .fini = sf_mem_
 	assert_free_block_count(3776, 1);
 	assert_quick_list_block_count(0, 0);
 	cr_assert(sf_errno == 0, "sf_errno is not zero!");
+	assert_no_splinter();
+    assert_no_mismatch();
 }
 
 Test(sf_memsuite_student, free_coalesce, .init = sf_mem_init, .fini = sf_mem_fini) {
@@ -145,6 +214,8 @@ Test(sf_memsuite_student, free_coalesce, .init = sf_mem_init, .fini = sf_mem_fin
 	assert_free_block_count(3456, 1);
 	assert_quick_list_block_count(0, 0);
 	cr_assert(sf_errno == 0, "sf_errno is not zero!");
+	assert_no_splinter();
+    assert_no_mismatch();
 }
 
 Test(sf_memsuite_student, freelist, .init = sf_mem_init, .fini = sf_mem_fini) {
@@ -154,11 +225,9 @@ Test(sf_memsuite_student, freelist, .init = sf_mem_init, .fini = sf_mem_fini) {
 	/* void *x = */ sf_malloc(500);
 	void *y = sf_malloc(600);
 	/* void *z = */ sf_malloc(700);
-	sf_show_heap();
 	sf_free(u);
 	sf_free(w);
 	sf_free(y);
-	sf_show_heap();
 	assert_free_block_count(0, 4);
 	assert_free_block_count(208, 1);
 	assert_free_block_count(416, 1);
@@ -171,6 +240,8 @@ Test(sf_memsuite_student, freelist, .init = sf_mem_init, .fini = sf_mem_fini) {
 	cr_assert_eq(bp, (sf_header *)((char *)y - sizeof(sf_header)),
 		     "Wrong first block in main free list: (found=%p, exp=%p)",
                      bp, (sf_header *)((char *)y - sizeof(sf_header)));
+	assert_no_splinter();
+    assert_no_mismatch();
 }
 
 Test(sf_memsuite_student, realloc_larger_block, .init = sf_mem_init, .fini = sf_mem_fini) {
@@ -179,16 +250,15 @@ Test(sf_memsuite_student, realloc_larger_block, .init = sf_mem_init, .fini = sf_
 	x = sf_realloc(x, sizeof(int) * 10);
 
 	cr_assert_not_null(x, "x is NULL!");
-	sf_show_heap();
 	sf_header *hp = (sf_header *)((char *)x - sizeof(sf_header));
 	cr_assert(hp->block_size & THIS_BLOCK_ALLOCATED, "Allocated bit is not set!");
-	sf_show_heap();
-	printf("\n\n\n%u\n\n\n",(hp->requested_size));
 	cr_assert((hp->block_size & BLOCK_SIZE_MASK) == 48, "Realloc'ed block size not what was expected!");
 	assert_free_block_count(0, 2);
 	assert_free_block_count(3936, 1);
 	assert_quick_list_block_count(0, 1);
 	assert_quick_list_block_count(32, 1);
+	assert_no_splinter();
+    assert_no_mismatch();
 }
 
 Test(sf_memsuite_student, realloc_smaller_block_splinter, .init = sf_mem_init, .fini = sf_mem_fini) {
@@ -200,7 +270,6 @@ Test(sf_memsuite_student, realloc_smaller_block_splinter, .init = sf_mem_init, .
 
 	sf_header *hp = (sf_header *)((char*)y - sizeof(sf_header));
 	cr_assert(hp->block_size & THIS_BLOCK_ALLOCATED, "Allocated bit is not set!");
-	printf("\n\n\n\n ffff:%u \n\n\n\n", (hp->block_size & BLOCK_SIZE_MASK) );
 	cr_assert((hp->block_size & BLOCK_SIZE_MASK) == 48, "Block size not what was expected!");
 	cr_assert(hp->requested_size == 1, "Requested size not what was expected!");
 
@@ -208,6 +277,8 @@ Test(sf_memsuite_student, realloc_smaller_block_splinter, .init = sf_mem_init, .
 	assert_free_block_count(0, 1);
 	assert_free_block_count(4000, 1);
 	assert_quick_list_block_count(0, 0);
+	assert_no_splinter();
+    assert_no_mismatch();
 }
 
 Test(sf_memsuite_student, realloc_smaller_block_free_block, .init = sf_mem_init, .fini = sf_mem_fini) {
@@ -220,13 +291,14 @@ Test(sf_memsuite_student, realloc_smaller_block_free_block, .init = sf_mem_init,
 	cr_assert(hp->block_size & THIS_BLOCK_ALLOCATED, "Allocated bit is not set!");
 	cr_assert((hp->block_size & BLOCK_SIZE_MASK) == 32, "Realloc'ed block size not what was expected!");
 	cr_assert(hp->requested_size == 4, "Requested size not what was expected!");
-	sf_show_heap();
 	// After realloc'ing x, we can return a block of size 48 to the freelist.
 	// This block will go into the main freelist and be coalesced, as we do not add
 	// remainder blocks to a quick list.
 	assert_free_block_count(0, 1);
 	assert_free_block_count(4016, 1);
 	assert_quick_list_block_count(0, 0);
+	assert_no_splinter();
+    assert_no_mismatch();
 }
 
 // //############################################
