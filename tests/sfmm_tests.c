@@ -179,6 +179,7 @@ Test(sf_memsuite_student, realloc_larger_block, .init = sf_mem_init, .fini = sf_
 	x = sf_realloc(x, sizeof(int) * 10);
 
 	cr_assert_not_null(x, "x is NULL!");
+	sf_show_heap();
 	sf_header *hp = (sf_header *)((char *)x - sizeof(sf_header));
 	cr_assert(hp->block_size & THIS_BLOCK_ALLOCATED, "Allocated bit is not set!");
 	cr_assert((hp->block_size & BLOCK_SIZE_MASK) == 48, "Realloc'ed block size not what was expected!");
