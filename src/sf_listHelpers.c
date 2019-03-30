@@ -395,3 +395,17 @@ int addToQuickList(sf_block* ptr){
 void setNextInMemPA(sf_block* ptr, unsigned int prevAlloc){
     setPrevAlloc(getNextInMem(ptr),prevAlloc);
 }
+int isValidMemory(void* mem){
+    char* temp = (char*)mem;
+    temp -= 8;
+    if(mem > (void*)getPrologue() && mem < (void*)getEpilogue()){
+        // sf_block* ptr = (sf_block*)temp;
+        // if((getBlockSize(ptr) % 16) == 0 && getBlockSize(ptr) >= 32){
+        //      return 1;
+        // }
+        return 1;
+    }
+
+    return 0;
+
+}

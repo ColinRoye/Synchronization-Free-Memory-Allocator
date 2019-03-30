@@ -99,151 +99,132 @@ void assert_quick_list_block_count(size_t size, int count) {
     assert_no_mismatch();
 }
 
-// Test(sf_memsuite_student, empty_ql, .init = sf_mem_init, .fini = sf_mem_fini) {
-
-// 	void* b1 = sf_malloc(8);
-// 	void* b2 = sf_malloc(8);
-// 	void* b3 = sf_malloc(8);
-// 	void* b4 = sf_malloc(8);
-// 	void* b5 = sf_malloc(8);
-// 	void* b6 = sf_malloc(8);
-// 	sf_free(b1);
-// 	sf_free(b2);
-// 	sf_free(b3);
-// 	sf_free(b4);
-// 	sf_free(b5);
-// 	assert_quick_list_block_count(0, 5);
-// 	sf_free(b6);
-// 	assert_free_block_count(0, 3);
-// 	assert_quick_list_block_count(0, 1);
-// 	assert_no_splinter();
-// 	assert_no_mismatch();
-// }
-
-
-// Test(sf_memsuite_student, malloc_an_Integer_check_freelist, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	sf_errno = 0;
-// 	int *x = sf_malloc(sizeof(int));
-
-
-// 	cr_assert_not_null(x, "x is NULL!");
-
-// 	*x = 4;
-// 	cr_assert(*x == 4, "sf_malloc failed to give proper space for an int!");
-
-// 	assert_free_block_count(0, 1);
-// 	assert_free_block_count(4016, 1);
-// 	assert_quick_list_block_count(0, 0);
-// 	cr_assert(sf_errno == 0, "sf_errno is not zero!");
-// 	cr_assert(sf_mem_start() + PAGE_SZ == sf_mem_end(), "Allocated more than necessary!");
-// 	assert_no_splinter();
-//     assert_no_mismatch();
-// }
 
 
 
-// Test(sf_memsuite_student, malloc_three_pages, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	sf_errno = 0;
-// 	void *x = sf_malloc(3 * PAGE_SZ - sizeof(sf_prologue) - sizeof(sf_epilogue) - MIN_BLOCK_SIZE);
+Test(sf_memsuite_student, malloc_an_Integer_check_freelist, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_errno = 0;
+	int *x = sf_malloc(sizeof(int));
 
-// 	cr_assert_not_null(x, "x is NULL!");
-// 	assert_free_block_count(0, 0);
-// 	assert_quick_list_block_count(0, 0);
-// 	cr_assert(sf_errno == 0, "sf_errno is not 0!");
-// 	assert_no_splinter();
-//     assert_no_mismatch();
-// }
 
-// Test(sf_memsuite_student, malloc_over_four_pages, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	sf_errno = 0;
-// 	void *x = sf_malloc(PAGE_SZ << 2);
+	cr_assert_not_null(x, "x is NULL!");
 
-// 	cr_assert_null(x, "x is not NULL!");
-// 	assert_free_block_count(0, 1);
-// 	assert_free_block_count(16336, 1);
-// 	assert_quick_list_block_count(0, 0);
-// 	cr_assert(sf_errno == ENOMEM, "sf_errno is not ENOMEM!");
-// 	assert_no_splinter();
-//     assert_no_mismatch();
-// }
+	*x = 4;
+	cr_assert(*x == 4, "sf_malloc failed to give proper space for an int!");
 
-// Test(sf_memsuite_student, free_quick, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	sf_errno = 0;
-// 	/* void *x = */ sf_malloc(8);
-// 	void *y = sf_malloc(32);
-// 	/* void *z = */ sf_malloc(1);
+	assert_free_block_count(0, 1);
+	assert_free_block_count(4016, 1);
+	assert_quick_list_block_count(0, 0);
+	cr_assert(sf_errno == 0, "sf_errno is not zero!");
+	cr_assert(sf_mem_start() + PAGE_SZ == sf_mem_end(), "Allocated more than necessary!");
+	assert_no_splinter();
+    assert_no_mismatch();
+}
 
-// 	sf_free(y);
 
-// 	assert_free_block_count(0, 2);
-// 	assert_free_block_count(3936, 1);
-// 	assert_quick_list_block_count(48, 1);
-// 	cr_assert(sf_errno == 0, "sf_errno is not zero!");
-// 	assert_no_splinter();
-//     assert_no_mismatch();
-// }
 
-// Test(sf_memsuite_student, free_no_coalesce, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	sf_errno = 0;
-// 	/* void *x = */ sf_malloc(8);
-// 	void *y = sf_malloc(200);
-// 	/* void *z = */ sf_malloc(1);
+Test(sf_memsuite_student, malloc_three_pages, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_errno = 0;
+	void *x = sf_malloc(3 * PAGE_SZ - sizeof(sf_prologue) - sizeof(sf_epilogue) - MIN_BLOCK_SIZE);
 
-// 	sf_free(y);
+	cr_assert_not_null(x, "x is NULL!");
+	assert_free_block_count(0, 0);
+	assert_quick_list_block_count(0, 0);
+	cr_assert(sf_errno == 0, "sf_errno is not 0!");
+	assert_no_splinter();
+    assert_no_mismatch();
+}
 
-// 	assert_free_block_count(0, 2);
-// 	assert_free_block_count(208, 1);
-// 	assert_free_block_count(3776, 1);
-// 	assert_quick_list_block_count(0, 0);
-// 	cr_assert(sf_errno == 0, "sf_errno is not zero!");
-// 	assert_no_splinter();
-//     assert_no_mismatch();
-// }
+Test(sf_memsuite_student, malloc_over_four_pages, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_errno = 0;
+	void *x = sf_malloc(PAGE_SZ << 2);
 
-// Test(sf_memsuite_student, free_coalesce, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	sf_errno = 0;
-// 	/* void *w = */ sf_malloc(8);
-// 	void *x = sf_malloc(200);
-// 	void *y = sf_malloc(300);
-// 	/* void *z = */ sf_malloc(4);
+	cr_assert_null(x, "x is not NULL!");
+	assert_free_block_count(0, 1);
+	assert_free_block_count(16336, 1);
+	assert_quick_list_block_count(0, 0);
+	cr_assert(sf_errno == ENOMEM, "sf_errno is not ENOMEM!");
+	assert_no_splinter();
+    assert_no_mismatch();
+}
 
-// 	sf_free(y);
-// 	sf_free(x);
+Test(sf_memsuite_student, free_quick, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_errno = 0;
+	/* void *x = */ sf_malloc(8);
+	void *y = sf_malloc(32);
+	/* void *z = */ sf_malloc(1);
 
-// 	assert_free_block_count(0, 2);
-// 	assert_free_block_count(528, 1);
-// 	assert_free_block_count(3456, 1);
-// 	assert_quick_list_block_count(0, 0);
-// 	cr_assert(sf_errno == 0, "sf_errno is not zero!");
-// 	assert_no_splinter();
-//     assert_no_mismatch();
-// }
+	sf_free(y);
 
-// Test(sf_memsuite_student, freelist, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	void *u = sf_malloc(200);
-// 	/* void *v = */ sf_malloc(300);
-// 	void *w = sf_malloc(400);
-// 	/* void *x = */ sf_malloc(500);
-// 	void *y = sf_malloc(600);
-// 	/* void *z = */ sf_malloc(700);
-// 	sf_free(u);
-// 	sf_free(w);
-// 	sf_free(y);
-// 	assert_free_block_count(0, 4);
-// 	assert_free_block_count(208, 1);
-// 	assert_free_block_count(416, 1);
-// 	assert_free_block_count(608, 1);
-// 	assert_free_block_count(1264, 1);
-// 	assert_quick_list_block_count(0, 0);
+	assert_free_block_count(0, 2);
+	assert_free_block_count(3936, 1);
+	assert_quick_list_block_count(48, 1);
+	cr_assert(sf_errno == 0, "sf_errno is not zero!");
+	assert_no_splinter();
+    assert_no_mismatch();
+}
 
-// 	// First block in list should be the most recently freed block.
-// 	sf_block *bp = sf_free_list_head.body.links.next;
-// 	cr_assert_eq(bp, (sf_header *)((char *)y - sizeof(sf_header)),
-// 		     "Wrong first block in main free list: (found=%p, exp=%p)",
-//                      bp, (sf_header *)((char *)y - sizeof(sf_header)));
-// 	assert_no_splinter();
-//     assert_no_mismatch();
-// }
+Test(sf_memsuite_student, free_no_coalesce, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_errno = 0;
+	/* void *x = */ sf_malloc(8);
+	void *y = sf_malloc(200);
+	/* void *z = */ sf_malloc(1);
+
+	sf_free(y);
+
+	assert_free_block_count(0, 2);
+	assert_free_block_count(208, 1);
+	assert_free_block_count(3776, 1);
+	assert_quick_list_block_count(0, 0);
+	cr_assert(sf_errno == 0, "sf_errno is not zero!");
+	assert_no_splinter();
+    assert_no_mismatch();
+}
+
+Test(sf_memsuite_student, free_coalesce, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_errno = 0;
+	/* void *w = */ sf_malloc(8);
+	void *x = sf_malloc(200);
+	void *y = sf_malloc(300);
+	/* void *z = */ sf_malloc(4);
+
+	sf_free(y);
+	sf_free(x);
+
+	assert_free_block_count(0, 2);
+	assert_free_block_count(528, 1);
+	assert_free_block_count(3456, 1);
+	assert_quick_list_block_count(0, 0);
+	cr_assert(sf_errno == 0, "sf_errno is not zero!");
+	assert_no_splinter();
+    assert_no_mismatch();
+}
+
+Test(sf_memsuite_student, freelist, .init = sf_mem_init, .fini = sf_mem_fini) {
+	void *u = sf_malloc(200);
+	/* void *v = */ sf_malloc(300);
+	void *w = sf_malloc(400);
+	/* void *x = */ sf_malloc(500);
+	void *y = sf_malloc(600);
+	/* void *z = */ sf_malloc(700);
+	sf_free(u);
+	sf_free(w);
+	sf_free(y);
+	assert_free_block_count(0, 4);
+	assert_free_block_count(208, 1);
+	assert_free_block_count(416, 1);
+	assert_free_block_count(608, 1);
+	assert_free_block_count(1264, 1);
+	assert_quick_list_block_count(0, 0);
+
+	// First block in list should be the most recently freed block.
+	sf_block *bp = sf_free_list_head.body.links.next;
+	cr_assert_eq(bp, (sf_header *)((char *)y - sizeof(sf_header)),
+		     "Wrong first block in main free list: (found=%p, exp=%p)",
+                     bp, (sf_header *)((char *)y - sizeof(sf_header)));
+	assert_no_splinter();
+    assert_no_mismatch();
+}
 
 Test(sf_memsuite_student, realloc_larger_block, .init = sf_mem_init, .fini = sf_mem_fini) {
 	void *x = sf_malloc(sizeof(int));
@@ -546,7 +527,26 @@ Test(sf_memsuite_student, initPrologue_test, .init = sf_mem_init, .fini = sf_mem
 	cr_assert_eq(getBlockSize(ptr), 32);
 }
 
+Test(sf_memsuite_student, empty_ql, .init = sf_mem_init, .fini = sf_mem_fini) {
 
+	void* b1 = sf_malloc(8);
+	void* b2 = sf_malloc(8);
+	void* b3 = sf_malloc(8);
+	void* b4 = sf_malloc(8);
+	void* b5 = sf_malloc(8);
+	void* b6 = sf_malloc(8);
+	sf_free(b1);
+	sf_free(b2);
+	sf_free(b3);
+	sf_free(b4);
+	sf_free(b5);
+	assert_quick_list_block_count(0, 5);
+	sf_free(b6);
+	assert_free_block_count(0, 3);
+	assert_quick_list_block_count(0, 1);
+	assert_no_splinter();
+	assert_no_mismatch();
+}
 
 
 // sf_block* splitBlock(sf_block* ptr, size_t block_size, size_t requested_size);

@@ -61,6 +61,9 @@ void* sf_malloc(size_t size) {
 
 
 void sf_free(void *ptr) {
+    if(!isValidMemory(ptr)){
+        abort();
+    }
     char* chg = (char*)ptr;
     sf_block* temp = (sf_block*)(chg-8);
     if(addToQuickList(temp)){
@@ -75,9 +78,10 @@ void sf_free(void *ptr) {
 }
 
 void* sf_realloc(void *ptr, size_t size) {
-    // if(!isValidMemory(ptr)){
-    //     return
-    // }
+    if(!isValidMemory(ptr)){
+        sf_errno = EINVAL;
+        return  NULL;
+    }
     char* temp = (char*)ptr;
     temp = (temp-8);
     sf_block* blk = (sf_block*)temp;
@@ -94,7 +98,9 @@ void* sf_realloc(void *ptr, size_t size) {
     if(getBlockSize(blk) < block_size){
         //malloc
         sf_block* frick = sf_malloc(requested_size);
-
+        if(frick == NULL){
+            return NULL;
+        }
         memcpy((char*)frick, (char*)ptr, requested_size);
         sf_free(ptr);
 

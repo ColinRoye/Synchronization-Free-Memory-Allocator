@@ -40,5 +40,6 @@ int addToQuickList(sf_block* ptr);
 void setNextInMemPA(sf_block* ptr, unsigned int prevAlloc);
 void FL_add(sf_block* ptr);
 void FL_remove(sf_block* ptr);
+int isValidMemory(void* ptr);
 #endif
 
