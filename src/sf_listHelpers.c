@@ -353,8 +353,6 @@ void* getPayload(sf_block* ptr){
     return (sf_block*)temp;
 }
 void emptyQL(int i){
-   // printf("\n\n\n\n\n\n%d\n", QUICK_LIST_MAX);
-    sf_show_heap();
     sf_block* current = sf_quick_lists[i].first;
     sf_block* next;
     for(int j = 0; j < QUICK_LIST_MAX; j++){
@@ -362,7 +360,6 @@ void emptyQL(int i){
         setAlloc(current, 0);
         coaless((current));
         current = next;
-    sf_show_heap();
 
     }
     sf_quick_lists[i].length = 0;
