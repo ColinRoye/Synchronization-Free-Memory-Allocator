@@ -39,10 +39,8 @@ void assert_no_mismatch() {
 void assert_no_splinter() {
 	sf_block* ptr = getPrologue();
 	sf_block* end = getEpilogue();
-			sf_show_heap();
 
 	while(ptr < end){
-		printf("%u\n", getBlockSize(ptr));
 		cr_assert_eq((getBlockSize(ptr) >= 32),1, "ERR: SPLINTER FOUND :%d:",getBlockSize(ptr));
 		cr_assert_eq((getBlockSize(ptr)%16),0, "BLOCK SIZE NOT FACTOR OF 16");
 		ptr = getNextInMem(ptr);
@@ -453,55 +451,6 @@ Test(sf_memsuite_student, clearHeader_test, .init = sf_mem_init, .fini = sf_mem_
 
 
 }
-//SET FOOTER
-// Test(sf_memsuite_student, setFooter_test, .init = sf_mem_init, .fini = sf_mem_fini) {
-// 	sf_block* ptr = sf_mem_grow();
-// 	sf_block* ftr_ptr;
-// 	char* temp = (char*)ptr;
-// 	unsigned int block_size = 0xFFFFFFFC;
-// 	unsigned int nextAlloc = 1;
-// 	unsigned int prevAlloc = 1;
-
-// 	ftr_ptr = (sf_block*)(temp+(block_size-8));
-
-// 	int check = setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, ptr, ptr);
-// 	check += setFooter(ptr, block_size, prevAlloc, nextAlloc);
-
-// 	cr_assert_eq(check, 0);
-
-
-// 	block_size = 32;
-// 	nextAlloc = 0;
-// 	prevAlloc = 1;
-
-// 	ftr_ptr = (sf_block*)(temp+(block_size-8));
-
-
-// 	setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, ptr, ptr);
-// 	setFooter(ptr, block_size, prevAlloc, nextAlloc);
-
-// 	cr_assert_eq(getBlockSize(ftr_ptr), getBlockSize(ptr));
-// 	cr_assert_eq(getAlloc(ftr_ptr), getAlloc(ptr));
-// 	cr_assert_eq(getPrevAlloc(ftr_ptr), getPrevAlloc(ptr));
-
-
-
-// 	block_size = 48;
-// 	nextAlloc = 0;
-// 	prevAlloc = 1;
-
-// 	ftr_ptr = (sf_block*)(temp+(block_size-8));
-
-
-// 	setFreeHeader(ptr, block_size, prevAlloc, nextAlloc, ptr, ptr);
-// 	setFooter(ptr, block_size, prevAlloc, nextAlloc);
-
-// 	cr_assert_eq(getBlockSize(ftr_ptr), getBlockSize(ptr));
-// 	cr_assert_eq(getAlloc(ftr_ptr), getAlloc(ptr));
-// 	cr_assert_eq(getPrevAlloc(ftr_ptr), getPrevAlloc(ptr));
-
-
-// }
 
 //INIT  EPILOGUE
 Test(sf_memsuite_student, initEpilogue_test, .init = sf_mem_init, .fini = sf_mem_fini) {
